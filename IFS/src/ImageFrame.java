@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Scanner;
@@ -114,7 +115,7 @@ public class ImageFrame extends JFrame implements Runnable{
                     }
 
                     // parse file
-                    double[] transform_data = new double[6];
+                    double[] transform_data = new double[7];
                     LinkedList<TransformWrapper> affineTransforms = new LinkedList<TransformWrapper>();
                     Scanner scanner;
                     FileReader fr = new FileReader(file);
@@ -127,35 +128,18 @@ public class ImageFrame extends JFrame implements Runnable{
                         scanner = new Scanner(line);
                         while ( scanner.hasNextDouble() ) {
                             d = scanner.nextDouble();
-                            if (count == 0) {
-                                transform_data[0] = d;
-                            }
-                            else if (count == 1) {
-                                transform_data[1] = d;
-                            }
-                            else if (count == 2) {
-                                transform_data[3] = d;
-                            }
-                            else if (count == 3) {
-                                transform_data[4] = d;
-                            }
-                            else if (count == 4) {
-                                transform_data[2] = d;
-                            }
-                            else if (count == 5) {
-                                transform_data[5] = d;
-                            }
-                            else if (count == 6) {
-                                probability = d;
-                            }
-                            else {
+                            transform_data[count] = d;
+                            if (count > 6) {
                                 throw new Exception("Invalid IFS Description");
                             }
                             count++;
                         }
-                        affineTransforms.add(new TransformWrapper(new AffineTransform(transform_data), probability));
+                        affineTransforms.add(new TransformWrapper(new AffineTransform(transform_data[0], transform_data[2],
+                                transform_data[1], transform_data[3],
+                                transform_data[4], transform_data[5]),
+                                transform_data[6]));
+                        transform_data[6] = 0;
                         count = 0;
-                        probability = 0;
                     }
 
                     determineWeights(affineTransforms);
@@ -250,10 +234,17 @@ public class ImageFrame extends JFrame implements Runnable{
             sum += Math.abs(det);
             P -= tw.getProbability();
         }
-
-        for (TransformWrapper tw : affineTransforms){
-            if (tw.getProbability() == 0) {
-                tw.setProbability((Math.abs(tw.getTransform().getDeterminant()) / sum) * P);
+        if (P != 1) {
+            for (TransformWrapper tw : affineTransforms) {
+                if (tw.getProbability() == 0) {
+                    tw.setProbability((Math.abs(tw.getTransform().getDeterminant()) / sum) * P);
+                }
+            }
+        } else {
+            for (TransformWrapper tw : affineTransforms) {
+                if (tw.getProbability() == 0) {
+                    tw.setProbability(1.0 / affineTransforms.size());
+                }
             }
         }
 
@@ -268,7 +259,22 @@ public class ImageFrame extends JFrame implements Runnable{
 
     // save the image
     private void saveImage(){
-        // ...
+        try
+        {
+            // load file
+            File outputFile = getFile();
+            if (outputFile == null) {
+                throw new IOException();
+            }
+            javax.imageio.ImageIO.write( image, "png", outputFile );
+        }
+        catch ( IOException e )
+        {
+            JOptionPane.showMessageDialog( ImageFrame.this,
+                    "Error saving file",
+                    "oops!",
+                    JOptionPane.ERROR_MESSAGE );
+        }
     }
 
     // open a file selected by the user
