@@ -7,12 +7,12 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Scanner;
 
 public class ImageFrame extends JFrame implements Runnable{
 
-    private Graphics2D g2d;
     private ImageIcon image_icon;
     private JLabel label;
     private final JFileChooser chooser;
@@ -23,7 +23,7 @@ public class ImageFrame extends JFrame implements Runnable{
     public ImageFrame(int width, int height) {
 
         // frame attributes
-        this.setTitle("CAP 3027 2017 - HW05b - Michael Wulber");
+        this.setTitle("CAP 3027 2017 - HW07 - Michael Wulber");
         this.setSize(width, height);
         this.image_icon = new ImageIcon();
         this.label = new JLabel(image_icon);
@@ -256,6 +256,14 @@ public class ImageFrame extends JFrame implements Runnable{
                 tw.setProbability((Math.abs(tw.getTransform().getDeterminant()) / sum) * P);
             }
         }
+
+        // sort for distributed random selection to work later
+        affineTransforms.sort(new Comparator<TransformWrapper>() {
+            @Override
+            public int compare(TransformWrapper o1, TransformWrapper o2) {
+                return (o1.getProbability() < o2.getProbability()) ? 1 : 0;
+            }
+        });
     }
 
     // save the image

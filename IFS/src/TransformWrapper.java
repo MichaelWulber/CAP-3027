@@ -28,7 +28,7 @@ public class TransformWrapper {
 
     public String toString(){
         String s = "";
-        double[] m = new double[9];
+        double[] m = new double[6];
         transform.getMatrix(m);
         for (double d : m) {
             s += Double.toString(d) + ", ";

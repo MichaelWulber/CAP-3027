@@ -1,13 +1,14 @@
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import java.util.Random;
 
 public class IFS {
     private final int DEPTH_THRESHHOLD = 100;
-    private final int ITERATIONS = 1000000;
+    private final int ITERATIONS = 100;
 
     private LinkedList<TransformWrapper> transforms;
     private Color foreground;
@@ -31,22 +32,23 @@ public class IFS {
             System.out.println(tw.toString());
         }
 
-        double[] point = randomPoint();
-        AffineTransform at = randomAffineTransform();
+        Point2D.Double point = randomPoint();
+        System.out.println("(x, y): (" + point.x + ", " + point.y + ")" );
+        AffineTransform at;
 
-        for (int j = 0; j < DEPTH_THRESHHOLD; j++) {
+        for (int i = 0; i < DEPTH_THRESHHOLD; i++) {
             at = randomAffineTransform();
-            at.transform(point, 0, point, 0, 1);
-            g2d.draw(new Line2D.Double(mapX(point[0]), mapY(point[1]),
-                    mapX(point[0]), mapY(point[1])));
+            at.transform(point, point);
+            g2d.draw(new Line2D.Double(mapX(point.x), mapY(point.y),
+                    mapX(point.x), mapY(point.y)));
         }
 
         g2d.setColor(foreground);
         for (int i = 0; i < ITERATIONS; i++){
             at = randomAffineTransform();
-            at.transform(point, 0, point, 0, 1);
-            g2d.draw(new Line2D.Double(mapX(point[0]), mapY(point[1]),
-                    mapX(point[0]), mapY(point[1])));
+            at.transform(point, point);
+            g2d.draw(new Line2D.Double(mapX(point.x), mapY(point.y),
+                    mapX(point.x), mapY(point.y)));
         }
 
         g2d.dispose();
@@ -57,9 +59,11 @@ public class IFS {
         Random rng = new Random();
         double num = rng.nextDouble();
         double sum = 0;
+
         for (TransformWrapper tw : transforms){
             sum += tw.getProbability();
             if (num < sum){
+                System.out.println(tw.toString());
                 return tw.getTransform();
             }
         }
@@ -67,20 +71,19 @@ public class IFS {
     }
 
     // returns random point on the unit square
-    private double[] randomPoint(){
+    private Point2D.Double randomPoint(){
         Random rng = new Random();
-        double[] point = {rng.nextDouble(), rng.nextDouble()};
-        return point;
+        return new Point2D.Double(rng.nextDouble(), rng.nextDouble());
     }
 
     // mapping function
     private double mapX(double d){
-        return d * image.getWidth();
+        return d * (double)image.getWidth();
     }
 
     // mapping function
     private double mapY(double d){
-        return (1.0 - d) * image.getWidth();
+        return (1.0 - d) * (double)image.getWidth();
     }
 
     // GETTERS AND SETTERS
