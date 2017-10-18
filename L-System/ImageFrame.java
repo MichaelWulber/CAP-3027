@@ -190,13 +190,8 @@ public class ImageFrame extends JFrame implements Runnable {
                 String[] generator = line.split("=");
                 generators.put(generator[0], generator[1]);
             }
-            ls.setGenerators(generators);
-
-            // debub
-            System.out.println(ls.toString());
-            System.out.println(ls.stringGenerator(1));
-            System.out.println(ls.stringGenerator(2));
-            // debug
+            LS.setGenerators(generators);
+            System.out.println(LS.stringGenerator(1));
 
         } catch(Exception e){
             JOptionPane.showMessageDialog(null, e, "error", JOptionPane.ERROR_MESSAGE );
@@ -217,22 +212,22 @@ public class ImageFrame extends JFrame implements Runnable {
                     }
 
                     d = JOptionPane.showInputDialog("What would you like the starting x position to be?");
-                    int x = Integer.parseInt(d);
+                    double x = Double.parseDouble(d);
                     if (x < -1 || x > 1){
                         throw new Exception("invalid input");
                     }
 
                     d = JOptionPane.showInputDialog("What would you like the starting y position to be?");
-                    int y = Integer.parseInt(d);
+                    double y = Double.parseDouble(d);
                     if (y < -1 || y > 1){
                         throw new Exception("invalid input");
                     }
 
                     d = JOptionPane.showInputDialog("What would you like initial bearing to be?");
-                    int b = Integer.parseInt(d);
+                    double b = Double.parseDouble(d);
 
                     d = JOptionPane.showInputDialog("What would you like the base segment length to be?");
-                    int bsl = Integer.parseInt(d);
+                    double bsl = Double.parseDouble(d);
                     if (bsl <= 0){
                         throw new Exception("invalid input");
                     }

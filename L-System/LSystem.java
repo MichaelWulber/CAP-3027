@@ -1,4 +1,7 @@
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -41,30 +44,57 @@ public class LSystem {
     }
 
     public BufferedImage imageGenerator(int generations){
+        // Graphics2D object
+        Graphics2D g2d = (Graphics2D)image.createGraphics();
+        g2d.setColor(background);
+        g2d.fillRect(0, 0, image.getWidth(), image.getHeight());
+        g2d.setColor(foreground);
+
+//        // Affine transform used to calculate the endpoint values
+//        Point2D.Double basePoint = new Point2D.Double(turtleState.bsl, 0);
+//        AffineTransform rotate = AffineTransform.getRotateInstance(this.delta);
+//
+//        // Affine transforms used map (x, y) onto the display
+//        AffineTransform translate1 = AffineTransform.getTranslateInstance(1.0, 1.0);
+//        AffineTransform flipY = AffineTransform.getScaleInstance(0.0, -1.0);
+//        AffineTransform scale = AffineTransform.getScaleInstance(image.getWidth()/2, -image.getHeight()/2);
+//        AffineTransform composite1 = scale;
+//        composite1.concatenate(flipY);
+//        composite1.concatenate(translate1);
+
+        Point2D.Double endPoint;
+        double seg_len = turtleState.bsl/Math.pow(slsf, generations);
         StringBuilder instructions = stringGenerator(generations);
         for (int i = 0; i < instructions.length(); ++i){
-            if (instructions.charAt(i) == 'F') {
-
-            } else if (instructions.charAt(i) == 'F'){
-
+            if (instructions.charAt(i) == 'F'){
+                endPoint = new Point2D.Double(turtleState.coord.x + turtleState.bsl * Math.cos(turtleState.bearing),
+                        turtleState.coord.y + turtleState.bsl * Math.sin(turtleState.bearing));
+                g2d.draw(new Line2D.Double(turtleState.coord.x, turtleState.coord.y, endPoint.x, endPoint.y));
             } else if (instructions.charAt(i) == 'f'){
-
+                endPoint = new Point2D.Double(turtleState.coord.x + turtleState.bsl * Math.cos(turtleState.bearing),
+                        turtleState.coord.y + turtleState.bsl * Math.sin(turtleState.bearing));
             } else if (instructions.charAt(i) == 'L'){
-
+                endPoint = new Point2D.Double(turtleState.coord.x + turtleState.bsl * Math.cos(turtleState.bearing),
+                        turtleState.coord.y + turtleState.bsl * Math.sin(turtleState.bearing));
+                g2d.draw(new Line2D.Double(turtleState.coord.x, turtleState.coord.y, endPoint.x, endPoint.y));
             } else if (instructions.charAt(i) == 'l'){
-
+                endPoint = new Point2D.Double(turtleState.coord.x + turtleState.bsl * Math.cos(turtleState.bearing),
+                        turtleState.coord.y + turtleState.bsl * Math.sin(turtleState.bearing));
             } else if (instructions.charAt(i) == 'R'){
-
+                endPoint = new Point2D.Double(turtleState.coord.x + turtleState.bsl * Math.cos(turtleState.bearing),
+                        turtleState.coord.y + turtleState.bsl * Math.sin(turtleState.bearing));
+                g2d.draw(new Line2D.Double(turtleState.coord.x, turtleState.coord.y, endPoint.x, endPoint.y));
             } else if (instructions.charAt(i) == 'r'){
-
+                endPoint = new Point2D.Double(turtleState.coord.x + turtleState.bsl * Math.cos(turtleState.bearing),
+                        turtleState.coord.y + turtleState.bsl * Math.sin(turtleState.bearing));
             } else if (instructions.charAt(i) == '['){
-
+                states.push(new TurtleState(turtleState.x, turtleState.y, turtleState.bearing, turtleState.bsl));
             } else if (instructions.charAt(i) == ']'){
-
+                turtleState = states.pop();
             } else if (instructions.charAt(i) == '+'){
-
+                turtleState.bearing += delta;
             } else if (instructions.charAt(i) == '-'){
-
+                turtleState.bearing -= delta;
             }
         }
         return this.image;
@@ -82,6 +112,13 @@ public class LSystem {
         return index;
     }
 
+    private double mapX(double x){
+        return ( (x + 1.0) * (image.getWidth()/2.0) );
+    }
+
+    private double mapY(double y){
+        return ( image.getHeight() - (y + 1.0) * (image.getHeight()/2.0) );
+    }
     // ...
 
     // GETTERS and SETTERS
