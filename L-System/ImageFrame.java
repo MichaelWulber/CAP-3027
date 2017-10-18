@@ -259,7 +259,9 @@ public class ImageFrame extends JFrame implements Runnable {
                     ls.turtleState.setBearing(b);
                     ls.turtleState.bsl = bsl;
 
+
                     final BufferedImage LS_image = LS.imageGenerator(gen);
+                    image = LS_image;
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
