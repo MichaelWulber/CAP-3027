@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -46,55 +47,77 @@ public class LSystem {
     public BufferedImage imageGenerator(int generations){
         // Graphics2D object
         Graphics2D g2d = (Graphics2D)image.createGraphics();
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON );
         g2d.setColor(background);
         g2d.fillRect(0, 0, image.getWidth(), image.getHeight());
         g2d.setColor(foreground);
 
+        StringBuilder instructions = stringGenerator(generations);
+        double scale = (turtleState.bsl/2)/(Math.pow(slsf, generations));
+        Point2D.Double endPoint = new Point2D.Double();
+
 //        // Affine transform used to calculate the endpoint values
-//        Point2D.Double basePoint = new Point2D.Double(turtleState.bsl, 0);
-//        AffineTransform rotate = AffineTransform.getRotateInstance(this.delta);
+//        AffineTransform translate = AffineTransform.getTranslateInstance( scale * Math.cos(Math.toRadians(turtleState.getBearing())),
+//                scale * Math.sin(Math.toRadians(turtleState.getBearing())) );
 //
 //        // Affine transforms used map (x, y) onto the display
-//        AffineTransform translate1 = AffineTransform.getTranslateInstance(1.0, 1.0);
-//        AffineTransform flipY = AffineTransform.getScaleInstance(0.0, -1.0);
-//        AffineTransform scale = AffineTransform.getScaleInstance(image.getWidth()/2, -image.getHeight()/2);
-//        AffineTransform composite1 = scale;
-//        composite1.concatenate(flipY);
-//        composite1.concatenate(translate1);
+//        AffineTransform translate1 = AffineTransform.getTranslateInstance(1.0, -1.0);
+//        AffineTransform scale1 = AffineTransform.getScaleInstance(image.getWidth()/2, -image.getHeight()/2);
+//        AffineTransform mapToDisplay = scale1;
+//        mapToDisplay.concatenate(translate1);
 
-        Point2D.Double endPoint;
-        double seg_len = turtleState.bsl/Math.pow(slsf, generations);
-        StringBuilder instructions = stringGenerator(generations);
         for (int i = 0; i < instructions.length(); ++i){
             if (instructions.charAt(i) == 'F'){
-                endPoint = new Point2D.Double(turtleState.coord.x + turtleState.bsl * Math.cos(turtleState.bearing),
-                        turtleState.coord.y + turtleState.bsl * Math.sin(turtleState.bearing));
-                g2d.draw(new Line2D.Double(turtleState.coord.x, turtleState.coord.y, endPoint.x, endPoint.y));
-            } else if (instructions.charAt(i) == 'f'){
-                endPoint = new Point2D.Double(turtleState.coord.x + turtleState.bsl * Math.cos(turtleState.bearing),
-                        turtleState.coord.y + turtleState.bsl * Math.sin(turtleState.bearing));
-            } else if (instructions.charAt(i) == 'L'){
-                endPoint = new Point2D.Double(turtleState.coord.x + turtleState.bsl * Math.cos(turtleState.bearing),
-                        turtleState.coord.y + turtleState.bsl * Math.sin(turtleState.bearing));
-                g2d.draw(new Line2D.Double(turtleState.coord.x, turtleState.coord.y, endPoint.x, endPoint.y));
-            } else if (instructions.charAt(i) == 'l'){
-                endPoint = new Point2D.Double(turtleState.coord.x + turtleState.bsl * Math.cos(turtleState.bearing),
-                        turtleState.coord.y + turtleState.bsl * Math.sin(turtleState.bearing));
-            } else if (instructions.charAt(i) == 'R'){
-                endPoint = new Point2D.Double(turtleState.coord.x + turtleState.bsl * Math.cos(turtleState.bearing),
-                        turtleState.coord.y + turtleState.bsl * Math.sin(turtleState.bearing));
-                g2d.draw(new Line2D.Double(turtleState.coord.x, turtleState.coord.y, endPoint.x, endPoint.y));
-            } else if (instructions.charAt(i) == 'r'){
-                endPoint = new Point2D.Double(turtleState.coord.x + turtleState.bsl * Math.cos(turtleState.bearing),
-                        turtleState.coord.y + turtleState.bsl * Math.sin(turtleState.bearing));
-            } else if (instructions.charAt(i) == '['){
-                states.push(new TurtleState(turtleState.x, turtleState.y, turtleState.bearing, turtleState.bsl));
-            } else if (instructions.charAt(i) == ']'){
+                endPoint = new Point2D.Double(turtleState.coord.x + scale * Math.cos(Math.toRadians(turtleState.getBearing())),
+                        turtleState.coord.y + scale * Math.sin(Math.toRadians(turtleState.getBearing())));
+                g2d.draw(new Line2D.Double(mapX(turtleState.coord.x), mapY(turtleState.coord.y), mapX(endPoint.x), mapY(endPoint.y)));
+                turtleState.coord.x = endPoint.x;
+                turtleState.coord.y = endPoint.y;
+            }
+            else if (instructions.charAt(i) == 'f'){
+                endPoint = new Point2D.Double(turtleState.coord.x + scale * Math.cos(Math.toRadians(turtleState.getBearing())),
+                        turtleState.coord.y + scale * Math.sin(Math.toRadians(turtleState.getBearing())));
+                turtleState.coord.x = endPoint.x;
+                turtleState.coord.y = endPoint.y;
+            }
+            else if (instructions.charAt(i) == 'L'){
+                endPoint = new Point2D.Double(turtleState.coord.x + scale * Math.cos(Math.toRadians(turtleState.getBearing())),
+                        turtleState.coord.y + scale * Math.sin(Math.toRadians(turtleState.getBearing())));
+                g2d.draw(new Line2D.Double(mapX(turtleState.coord.x), mapY(turtleState.coord.y), mapX(endPoint.x), mapY(endPoint.y)));
+                turtleState.coord.x = endPoint.x;
+                turtleState.coord.y = endPoint.y;
+            }
+            else if (instructions.charAt(i) == 'l'){
+                endPoint = new Point2D.Double(turtleState.coord.x + scale * Math.cos(Math.toRadians(turtleState.getBearing())),
+                        turtleState.coord.y + scale * Math.sin(Math.toRadians(turtleState.getBearing())));
+                turtleState.coord.x = endPoint.x;
+                turtleState.coord.y = endPoint.y;
+            }
+            else if (instructions.charAt(i) == 'R'){
+                endPoint = new Point2D.Double(turtleState.coord.x + scale * Math.cos(Math.toRadians(turtleState.getBearing())),
+                        turtleState.coord.y + scale * Math.sin(Math.toRadians(turtleState.getBearing())));
+                g2d.draw(new Line2D.Double(mapX(turtleState.coord.x), mapY(turtleState.coord.y), mapX(endPoint.x), mapY(endPoint.y)));
+                turtleState.coord.x = endPoint.x;
+                turtleState.coord.y = endPoint.y;
+            }
+            else if (instructions.charAt(i) == 'r'){
+                endPoint = new Point2D.Double(turtleState.coord.x + scale * Math.cos(Math.toRadians(turtleState.getBearing())),
+                        turtleState.coord.y + scale * Math.sin(Math.toRadians(turtleState.getBearing())));
+                turtleState.coord.x = endPoint.x;
+                turtleState.coord.y = endPoint.y;
+            }
+            else if (instructions.charAt(i) == '['){
+                states.push(new TurtleState(turtleState.coord.x, turtleState.coord.y, turtleState.getBearing(), turtleState.bsl));
+            }
+            else if (instructions.charAt(i) == ']'){
                 turtleState = states.pop();
-            } else if (instructions.charAt(i) == '+'){
-                turtleState.bearing += delta;
-            } else if (instructions.charAt(i) == '-'){
-                turtleState.bearing -= delta;
+            }
+            else if (instructions.charAt(i) == '+'){
+                turtleState.setBearing( (turtleState.getBearing() + delta) );
+            }
+            else if (instructions.charAt(i) == '-'){
+                turtleState.setBearing( (turtleState.getBearing() - delta) );
             }
         }
         return this.image;
@@ -107,7 +130,7 @@ public class LSystem {
             String replacement = generators.get(String.valueOf(output.charAt(index)));
             output.insert(index, replacement);
             output.deleteCharAt(index + replacement.length());
-            return index + replacement.length();
+            return index + replacement.length() - 1;
         }
         return index;
     }
@@ -117,9 +140,8 @@ public class LSystem {
     }
 
     private double mapY(double y){
-        return ( image.getHeight() - (y + 1.0) * (image.getHeight()/2.0) );
+        return ( (1.0 - y) * (image.getHeight()/2.0) );
     }
-    // ...
 
     // GETTERS and SETTERS
     public void setImage(BufferedImage image) {
@@ -150,12 +172,15 @@ public class LSystem {
         this.generators = generators;
     }
 
-    @Override
-    public String toString() {
-        String s = delta + "\n" + slsf + "\n" + initiator + "\n";
-        for(Map.Entry<String, String> entry : generators.entrySet()) {
-            s += "( " + entry.getKey() + ", " + entry.getValue() + " )\n";
-        }
-        return s;
+    public BufferedImage getImage() {
+        return image;
+    }
+
+    public Color getBackground() {
+        return background;
+    }
+
+    public Color getForeground() {
+        return foreground;
     }
 }

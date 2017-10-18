@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 public class ImageFrame extends JFrame implements Runnable {
@@ -14,6 +15,7 @@ public class ImageFrame extends JFrame implements Runnable {
     private final JFileChooser chooser;
     private BufferedImage image;
 
+    private LinkedList<LSystem> LSQueue;
     private LSystem LS;
 
     public ImageFrame(int width, int height) {
@@ -33,6 +35,7 @@ public class ImageFrame extends JFrame implements Runnable {
         addMenu();
 
         // create LSystem
+        this.LSQueue = new LinkedList<LSystem>();
         this.LS = new LSystem();
     }
 
@@ -130,6 +133,12 @@ public class ImageFrame extends JFrame implements Runnable {
                 throw new Exception("Invalid Color");
             }
 
+            for (LSystem ls : LSQueue){
+                ls.setImage(new BufferedImage(dim, dim, BufferedImage.TYPE_INT_ARGB));
+                ls.setForeground(new Color(foreground));
+                ls.setBackground(new Color(background));
+            }
+
             LS.setImage(new BufferedImage(dim, dim, BufferedImage.TYPE_INT_ARGB));
             LS.setForeground(new Color(foreground));
             LS.setBackground(new Color(background));
@@ -190,8 +199,12 @@ public class ImageFrame extends JFrame implements Runnable {
                 String[] generator = line.split("=");
                 generators.put(generator[0], generator[1]);
             }
-            LS.setGenerators(generators);
-            System.out.println(LS.stringGenerator(1));
+
+            ls.setGenerators(generators);
+            ls.setForeground(LS.getForeground());
+            ls.setBackground(LS.getBackground());
+            ls.setImage(LS.getImage());
+            LSQueue.push(ls);
 
         } catch(Exception e){
             JOptionPane.showMessageDialog(null, e, "error", JOptionPane.ERROR_MESSAGE );
@@ -202,8 +215,8 @@ public class ImageFrame extends JFrame implements Runnable {
         new Thread(new Runnable() {
             @Override
             public void run() {
-
                 try {
+
                     // get user input
                     String d = JOptionPane.showInputDialog("What would you like the generation number to be?");
                     int gen = Integer.parseInt(d);
@@ -232,10 +245,19 @@ public class ImageFrame extends JFrame implements Runnable {
                         throw new Exception("invalid input");
                     }
 
-                    LS.turtleState.x = x;
-                    LS.turtleState.y = y;
-                    LS.turtleState.bearing = b;
-                    LS.turtleState.bsl = bsl;
+                    LSystem ls;
+                    if (!LSQueue.isEmpty()){
+                        ls = LSQueue.peekFirst();
+                        LS = ls;
+                        LSQueue.remove();
+                    } else {
+                        ls = LS;
+                    }
+
+                    ls.turtleState.coord.x = x;
+                    ls.turtleState.coord.y = y;
+                    ls.turtleState.setBearing(b);
+                    ls.turtleState.bsl = bsl;
 
                     final BufferedImage LS_image = LS.imageGenerator(gen);
                     SwingUtilities.invokeLater(new Runnable() {
