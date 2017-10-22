@@ -11,6 +11,9 @@ public class ImageFrame extends JFrame implements Runnable {
     private final JFileChooser chooser;
     private BufferedImage image;
 
+    private MandelbrotSet ms;
+    private MandlebrotPlotter plotter;
+
     public ImageFrame(int width, int height) {
 
         // frame attributes
@@ -27,6 +30,9 @@ public class ImageFrame extends JFrame implements Runnable {
         // add a menu to the frame
         addMenu();
 
+        this.ms = new MandelbrotSet();
+        this.plotter = new MandlebrotPlotter();
+        this.plotter.ms = this.ms;
     }
 
     private void addMenu(){
@@ -123,6 +129,12 @@ public class ImageFrame extends JFrame implements Runnable {
                 throw new Exception("Invalid Color");
             }
 
+            this.plotter.width = dim;
+            this.plotter.height = dim;
+
+            this.ms.memberColor = foreground;
+            this.ms.nonMemberColor = background;
+
 //            for (LSystem ls : LSQueue){
 //                ls.setImage(new BufferedImage(dim, dim, BufferedImage.TYPE_INT_ARGB));
 //                ls.setForeground(new Color(foreground));
@@ -158,13 +170,12 @@ public class ImageFrame extends JFrame implements Runnable {
             @Override
             public void run() {
                 try {
-
-                    // ...
+                    final BufferedImage display = plotter.plot();
 
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
-                            // display image
+                            displayBufferedImage(display);
                         }
                     });
 
