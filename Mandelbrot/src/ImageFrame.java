@@ -1,27 +1,52 @@
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
-public class ImageFrame extends JFrame implements Runnable {
+public class ImageFrame extends JFrame {
 
-    private ImageIcon image_icon;
-    private JLabel label;
+    private final AreaSelectPanel panel;
+    private final JButton button;
     private final JFileChooser chooser;
     private BufferedImage image;
 
-    private MandelbrotSet ms;
-    private MandlebrotPlotter plotter;
+    private MandelbrotSet mSet;
+    private MandlebrotPlotter mp;
+
+    private JuliaSet jSet;
+    private JuliaPlotter jp;
+
+    private int selection;
 
     public ImageFrame(int width, int height) {
 
         // frame attributes
         this.setTitle("CAP 3027 2017 - HW09 - Michael Wulber");
-        this.setSize(width, height);
-        this.image_icon = new ImageIcon();
-        this.label = new JLabel(image_icon);
-        this.setContentPane(new JScrollPane(label));
+
+        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        this.panel = new AreaSelectPanel(img);
+
+        this.button = new JButton("Zoom");
+        this.button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (selection == 0){
+                    mSet.bounds.map(width, height, panel.getXCoord(), panel.getYCoord(), panel.getW(), panel.getH());
+                    mandelbrotZoom();
+                } else if (selection == 1){
+                    jSet.bounds.map(width, height, panel.getXCoord(), panel.getYCoord(), panel.getW(), panel.getH());
+                    juliaZoom();
+                } else {
+                    System.out.println("error: cannot zoom");
+                }
+            }
+        });
+
+        this.getContentPane().add(panel, BorderLayout.CENTER);
+        this.getContentPane().add(button, BorderLayout.SOUTH);
 
         // setup file chooser
         chooser = new JFileChooser();
@@ -30,9 +55,15 @@ public class ImageFrame extends JFrame implements Runnable {
         // add a menu to the frame
         addMenu();
 
-        this.ms = new MandelbrotSet();
-        this.plotter = new MandlebrotPlotter();
-        this.plotter.ms = this.ms;
+        this.mSet = new MandelbrotSet();
+        this.mp = new MandlebrotPlotter();
+        this.mp.ms = this.mSet;
+
+        this.jSet = new JuliaSet();
+        this.jp = new JuliaPlotter();
+        this.jp.js = this.jSet;
+
+        this.selection = -1;
     }
 
     private void addMenu(){
@@ -41,45 +72,25 @@ public class ImageFrame extends JFrame implements Runnable {
         // File menu
         JMenu fileMenu = new JMenu("File");
 
-        // Exit
-        JMenuItem exitItem = new JMenuItem("Exit");
-        exitItem.addActionListener(new ActionListener() {
+        // Mandelbrot
+        JMenuItem mandelbrot = new JMenuItem("Mandelbrot");
+        mandelbrot.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                System.exit(0);
+                mandelbrot();
             }
         });
 
-        fileMenu.add(exitItem);
+        fileMenu.add(mandelbrot);
 
-        // Load Description
-        JMenuItem load = new JMenuItem("Load ...");
-        load.addActionListener(new ActionListener() {
+        // Julia
+        JMenuItem julia = new JMenuItem("Julia");
+        julia.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                load();
+                julia();
             }
         });
 
-        fileMenu.add(load);
-
-        // configure Image
-        JMenuItem configureImage = new JMenuItem("Configure Image");
-        configureImage.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                configureImage();
-            }
-        });
-
-        fileMenu.add(configureImage);
-
-        // Display
-        JMenuItem display = new JMenuItem("Display ...");
-        display.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                display();
-            }
-        });
-
-        fileMenu.add(display);
+        fileMenu.add(julia);
 
         // Save Image
         JMenuItem saveImage = new JMenuItem("Save Image");
@@ -91,94 +102,101 @@ public class ImageFrame extends JFrame implements Runnable {
 
         fileMenu.add(saveImage);
 
+        // Exit
+        JMenuItem exitItem = new JMenuItem("Exit");
+        exitItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+
+        fileMenu.add(exitItem);
+
         // attach menu to a menu bar
         JMenuBar menuBar = new JMenuBar();
         menuBar.add(fileMenu);
         this.setJMenuBar(menuBar);
     }
 
-    private void configureImage(){
-        try {
-            // get user input
-            String d = JOptionPane.showInputDialog("What would you like the size of the image to be?");
-            int dim = Integer.parseInt(d);
-
-            // get foreground color
-            d = JOptionPane.showInputDialog("What color would you like the foreground to be?");
-            int foreground;
-            if (d.substring(0, 2).equals("0x")){
-                foreground =(int) Long.parseLong( d.substring( 2, d.length() ), 16 );
-                if ( (foreground > 0xFFFFFF) || (foreground < 0) ){
-                    throw new Exception("Invalid Color");
-                }
-            }
-            else {
-                throw new Exception("Invalid Color");
-            }
-
-            // get background color
-            d = JOptionPane.showInputDialog("What color would you like the background to be?");
-            int background;
-            if (d.substring(0, 2).equals("0x")){
-                background =(int) Long.parseLong( d.substring( 2, d.length() ), 16 );
-                if ((background > 0xFFFFFF) || (background < 0)) {
-                    throw new Exception("Invalid Color");
-                }
-            }
-            else {
-                throw new Exception("Invalid Color");
-            }
-
-            this.plotter.width = dim;
-            this.plotter.height = dim;
-
-            this.ms.memberColor = foreground;
-            this.ms.nonMemberColor = background;
-
-//            for (LSystem ls : LSQueue){
-//                ls.setImage(new BufferedImage(dim, dim, BufferedImage.TYPE_INT_ARGB));
-//                ls.setForeground(new Color(foreground));
-//                ls.setBackground(new Color(background));
-//            }
-//
-//            LS.setImage(new BufferedImage(dim, dim, BufferedImage.TYPE_INT_ARGB));
-//            LS.setForeground(new Color(foreground));
-//            LS.setBackground(new Color(background));
-
-        } catch(Exception e){
-            JOptionPane.showMessageDialog(null, e, "error", JOptionPane.ERROR_MESSAGE );
-        }
-    }
-
-    private void load(){
-        try {
-            // load file
-            File file = getFile();
-            if (file == null) {
-                throw new Exception();
-            }
-
-            // ...
-
-        } catch(Exception e){
-            JOptionPane.showMessageDialog(null, e, "error", JOptionPane.ERROR_MESSAGE );
-        }
-    }
-
-    private void display(){
+    public void julia(){
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    final BufferedImage display = plotter.plot();
+                    jSet.resetBounds();
+                    final BufferedImage display = jp.plot();
 
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
-                            displayBufferedImage(display);
+                            panel.setImage(display);
                         }
                     });
+                    selection = 1;
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, e, "error", JOptionPane.ERROR_MESSAGE );
+                }
+            }
+        }).start();
+    }
 
+    public void juliaZoom(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final BufferedImage display = jp.plot();
+
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            panel.setImage(display);
+                        }
+                    });
+                    selection = 1;
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, e, "error", JOptionPane.ERROR_MESSAGE );
+                }
+            }
+        }).start();
+    }
+
+    public void mandelbrot(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mSet.resetBounds();
+                    final BufferedImage display = mp.plot();
+
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            panel.setImage(display);
+                        }
+                    });
+                    selection = 0;
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, e, "error", JOptionPane.ERROR_MESSAGE );
+                }
+            }
+        }).start();
+    }
+
+    public void mandelbrotZoom(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final BufferedImage display = mp.plot();
+
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            panel.setImage(display);
+                        }
+                    });
+                    selection = 0;
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(null, e, "error", JOptionPane.ERROR_MESSAGE );
                 }
@@ -216,19 +234,7 @@ public class ImageFrame extends JFrame implements Runnable {
         return file;
     }
 
-    // Display BufferedImage
-    public void displayBufferedImage(BufferedImage image) {
-        this.image_icon.setImage(image);
-        this.label.repaint();
-        this.validate();
-    }
-
     private String removeWhiteSpace(String input) {
         return input.replaceAll("\\s", "");
-    }
-
-    @Override
-    public void run() {
-
     }
 }

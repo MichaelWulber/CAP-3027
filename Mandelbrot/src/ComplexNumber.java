@@ -2,11 +2,6 @@ public class ComplexNumber {
     public double real;
     public double imag;
 
-    public ComplexNumber(){
-        this.real = 0;
-        this.imag = 0;
-    }
-
     public ComplexNumber(double real, double imag){
         this.real = real;
         this.imag = imag;
@@ -18,16 +13,19 @@ public class ComplexNumber {
     }
 
     public void mult(ComplexNumber num){
+        double temp = real;
         this.real = this.real*num.real - this.imag*num.imag;
-        this.imag = num.real*this.imag + this.real*num.imag;
+        this.imag = num.real*this.imag + temp*num.imag;
+    }
+
+    public void square(){
+        double temp = real;
+        this.real = temp * temp - imag * imag;
+        this.imag = temp * imag + temp * imag;
     }
 
     public double sumSquares(){
-        return  Math.pow(this.real, 2) + Math.pow(this.imag, 2);
-    }
-
-    public double magnitude(){
-        return Math.sqrt( this.sumSquares() );
+        return  (this.real * this.real + this.imag * this.imag);
     }
 
 }
