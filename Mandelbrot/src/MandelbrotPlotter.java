@@ -1,43 +1,34 @@
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class JuliaPlotter {
+public class MandelbrotPlotter {
+
     public int tmax;
     public int width;
     public int height;
-    public JuliaSet js;
-    public ComplexNumber m;
+    public MandelbrotSet ms;
 
-    public JuliaPlotter(){
+    public MandelbrotPlotter(){
         this.tmax = 100;
         this.width = 600;
         this.height = 450;
-        this.js = null;
-        this.m = new ComplexNumber(0.0, 1.0);
-    }
-
-    public JuliaPlotter(int tmax, int width, int height, JuliaSet js){
-        this.tmax = tmax;
-        this.width = width;
-        this.height = height;
-        this.js = js;
+        this.ms = null;
     }
 
     public BufferedImage normalPlot(){
         BufferedImage fractalImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
-        int[] colors = ColorUtil.doubleGradient(js.nonMemberColor1, js.nonMemberColor2, js.nonMemberColor3, tmax);
+        int[] colors = ColorUtil.doubleGradient(ms.nonMemberColor1, ms.nonMemberColor2, ms.nonMemberColor3, tmax);
 
-        ComplexNumber z0 = new ComplexNumber(js.bounds.lowerX, js.bounds.lowerY);
+        ComplexNumber m = new ComplexNumber(ms.bounds.lowerX, ms.bounds.lowerY);
         ComplexNumber z = new ComplexNumber(0, 0);
-        double dr = (js.bounds.upperX - js.bounds.lowerX)/((double)width - 1.0);
-        double di = (js.bounds.upperY - js.bounds.lowerY)/((double)height - 1.0);
+        double dr = (ms.bounds.upperX - ms.bounds.lowerX)/((double)width - 1.0);
+        double di = (ms.bounds.upperY - ms.bounds.lowerY)/((double)height - 1.0);
 
         int t = 0;
 
         for (int i = 0; i < width; ++i){
             for (int j = 0; j < height; ++j){
-                z.real = z0.real;
-                z.imag = z0.imag;
                 while (t < tmax){
                     z.square();
                     z.add(m);
@@ -49,33 +40,34 @@ public class JuliaPlotter {
                 if (t < tmax){
                     fractalImage.setRGB(i, j, colors[t]);
                 } else {
-                    fractalImage.setRGB(i, j, js.memberColor);
+                    fractalImage.setRGB(i, j, ms.memberColor);
                 }
-                z0.imag += di;
+                m.imag += di;
+                z.real = 0;
+                z.imag = 0;
                 t = 0;
             }
-            z0.imag = js.bounds.lowerY;
-            z0.real += dr;
+            m.imag = ms.bounds.lowerY;
+            m.real += di;
         }
+
         return fractalImage;
     }
 
     public BufferedImage tigerPlot(){
         BufferedImage fractalImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
-        int[] colors = ColorUtil.doubleGradient(js.nonMemberColor1, js.nonMemberColor2, js.nonMemberColor3, tmax);
+        int[] colors = ColorUtil.doubleGradient(ms.nonMemberColor1, ms.nonMemberColor2, ms.nonMemberColor3, tmax);
 
-        ComplexNumber z0 = new ComplexNumber(js.bounds.lowerX, js.bounds.lowerY);
+        ComplexNumber m = new ComplexNumber(ms.bounds.lowerX, ms.bounds.lowerY);
         ComplexNumber z = new ComplexNumber(0, 0);
-        double dr = (js.bounds.upperX - js.bounds.lowerX)/((double)width - 1.0);
-        double di = (js.bounds.upperY - js.bounds.lowerY)/((double)height - 1.0);
+        double dr = (ms.bounds.upperX - ms.bounds.lowerX)/((double)width - 1.0);
+        double di = (ms.bounds.upperY - ms.bounds.lowerY)/((double)height - 1.0);
 
         int t = 0;
 
         for (int i = 0; i < width; ++i){
             for (int j = 0; j < height; ++j){
-                z.real = z0.real;
-                z.imag = z0.imag;
                 while (t < tmax){
                     z.square();
                     z.add(m);
@@ -85,18 +77,23 @@ public class JuliaPlotter {
                     ++t;
                 }
                 if (t >= tmax){
-                    fractalImage.setRGB(i, j, js.memberColor);
-                } else if (t % 2 == 0) {
-                    fractalImage.setRGB(i, j, js.memberColor);
+                    fractalImage.setRGB(i, j, ms.memberColor);
+                } else if (t % 2 == 0){
+                    fractalImage.setRGB(i, j, ms.memberColor);
                 } else {
                     fractalImage.setRGB(i, j, colors[t]);
                 }
-                z0.imag += di;
+                m.imag += di;
+                z.real = 0;
+                z.imag = 0;
                 t = 0;
             }
-            z0.imag = js.bounds.lowerY;
-            z0.real += dr;
+            m.imag = ms.bounds.lowerY;
+            m.real += di;
         }
+
         return fractalImage;
     }
+
+
 }

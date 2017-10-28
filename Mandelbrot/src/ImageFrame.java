@@ -6,6 +6,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 
 public class ImageFrame extends JFrame {
+    private final int MANDELBROT = 0;
+    private final int JULIA = 1;
+
+    private final int NORMAL = 0;
+    private final int TIGER = 1;
 
     private final AreaSelectPanel panel;
     private final JButton button;
@@ -13,12 +18,13 @@ public class ImageFrame extends JFrame {
     private BufferedImage image;
 
     private MandelbrotSet mSet;
-    private MandlebrotPlotter mp;
+    private MandelbrotPlotter mp;
 
     private JuliaSet jSet;
     private JuliaPlotter jp;
 
     private int selection;
+    private int scheme;
 
     public ImageFrame(int width, int height) {
 
@@ -56,7 +62,7 @@ public class ImageFrame extends JFrame {
         addMenu();
 
         this.mSet = new MandelbrotSet();
-        this.mp = new MandlebrotPlotter();
+        this.mp = new MandelbrotPlotter();
         this.mp.ms = this.mSet;
 
         this.jSet = new JuliaSet();
@@ -92,6 +98,28 @@ public class ImageFrame extends JFrame {
 
         fileMenu.add(julia);
 
+        // color scheme
+        JMenu colorScheme = new JMenu("Color Scheme");
+
+        JMenuItem normal = new JMenuItem("Normal");
+        normal.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                scheme = NORMAL;
+            }
+        });
+
+        colorScheme.add(normal);
+
+        JMenuItem tiger = new JMenuItem("Tiger");
+        tiger.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                scheme = TIGER;
+            }
+        });
+
+        colorScheme.add(tiger);
+        fileMenu.add(colorScheme);
+
         // Save Image
         JMenuItem saveImage = new JMenuItem("Save Image");
         saveImage.addActionListener(new ActionListener() {
@@ -124,15 +152,27 @@ public class ImageFrame extends JFrame {
             public void run() {
                 try {
                     jSet.resetBounds();
-                    final BufferedImage display = jp.plot();
 
+                    // get user input
+                    String d = JOptionPane.showInputDialog("What would you like the value of mu to be?");
+                    d = removeWhiteSpace(d);
+                    String[] mu = d.split("\\+");
+                    jp.m = new ComplexNumber(Double.valueOf(mu[0]),  Double.valueOf(mu[1]));
+
+                    final BufferedImage display;
+                    if (scheme == NORMAL) {
+                        display = jp.normalPlot();
+                    } else {
+                        display = jp.tigerPlot();
+                    }
+                    image = display;
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
                             panel.setImage(display);
                         }
                     });
-                    selection = 1;
+                    selection = JULIA;
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(null, e, "error", JOptionPane.ERROR_MESSAGE );
                 }
@@ -145,8 +185,13 @@ public class ImageFrame extends JFrame {
             @Override
             public void run() {
                 try {
-                    final BufferedImage display = jp.plot();
-
+                    final BufferedImage display;
+                    if (scheme == NORMAL) {
+                        display = jp.normalPlot();
+                    } else {
+                        display = jp.tigerPlot();
+                    }
+                    image = display;
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
@@ -167,15 +212,20 @@ public class ImageFrame extends JFrame {
             public void run() {
                 try {
                     mSet.resetBounds();
-                    final BufferedImage display = mp.plot();
-
+                    final BufferedImage display;
+                    if (scheme == NORMAL) {
+                        display = mp.normalPlot();
+                    } else {
+                        display = mp.tigerPlot();
+                    }
+                    image = display;
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
                             panel.setImage(display);
                         }
                     });
-                    selection = 0;
+                    selection = MANDELBROT;
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(null, e, "error", JOptionPane.ERROR_MESSAGE );
                 }
@@ -188,15 +238,19 @@ public class ImageFrame extends JFrame {
             @Override
             public void run() {
                 try {
-                    final BufferedImage display = mp.plot();
-
+                    final BufferedImage display;
+                    if (scheme == NORMAL) {
+                        display = mp.normalPlot();
+                    } else {
+                        display = mp.tigerPlot();
+                    }
+                    image = display;
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
                             panel.setImage(display);
                         }
                     });
-                    selection = 0;
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(null, e, "error", JOptionPane.ERROR_MESSAGE );
                 }

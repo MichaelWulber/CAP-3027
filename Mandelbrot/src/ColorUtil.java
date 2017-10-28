@@ -76,4 +76,20 @@ public class ColorUtil {
 
         return lg;
     }
+    public static int[] doubleGradient(int c1, int c2, int c3, int num) {
+        int[] lg1 = getLinearGradient(c1, c2, num/2);
+        int[] lg2 = getLinearGradient(c2, c3, num/2);
+
+        int[] lg = new int[num];
+        for (int i = 0; i < num/2; ++i){
+            lg[i] = lg1[i];
+            lg[i + num/2] = lg2[i];
+        }
+        // debug
+        for (int i = 0; i < num; ++i){
+            System.out.println(lg[i]);
+
+        }
+        return lg;
+    }
 }
