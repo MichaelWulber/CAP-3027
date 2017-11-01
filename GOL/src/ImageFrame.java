@@ -7,6 +7,7 @@ import java.io.File;
 
 public class ImageFrame extends JFrame {
     private final GOLDisplayPanel panel;
+    private final JButton stepButton;
     private final JFileChooser chooser;
     private BufferedImage image;
 
@@ -17,7 +18,16 @@ public class ImageFrame extends JFrame {
         this.image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
         this.panel = new GOLDisplayPanel(new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB));
+        this.stepButton = new JButton("Step");
+        this.stepButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                panel.step();
+            }
+        });
+
         this.getContentPane().add(panel, BorderLayout.CENTER);
+        this.getContentPane().add(stepButton, BorderLayout.SOUTH);
 
         // setup file chooser
         chooser = new JFileChooser();

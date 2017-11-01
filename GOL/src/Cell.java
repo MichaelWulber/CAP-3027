@@ -1,6 +1,6 @@
 public class Cell {
-    private final int ALIVE = 1;
-    private final int DEAD = 0;
+    public final static int ALIVE = 1;
+    public final static int DEAD = 0;
 
     public int state;
 

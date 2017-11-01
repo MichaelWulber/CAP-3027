@@ -1,3 +1,3 @@
 public interface Topology {
-    void step(Cell[][] cells);
+    void step(CellGrid grid);
 }

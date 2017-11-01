@@ -11,8 +11,8 @@ import java.awt.image.ImageObserver;
 
 public class Launcher {
 
-    private static final int WIDTH = 1000;
-    private static final int HEIGHT = 1000;
+    private static final int WIDTH = 800;
+    private static final int HEIGHT = 800;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
