@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
@@ -10,10 +12,9 @@ public class GOLDisplayPanel extends JPanel {
     private final int WIDTH, MAX_X;
     private final int HEIGHT, MAX_Y;
 
-    private Color ALIVE;
     private Color GRIDLINES;
-    private Color BACKGROUND;
     private int STROKEWIDTH;
+    private int MILLESECONDS_BETWEEN_FRAMES;
 
     private BufferedImage image;
     private Graphics2D g2d;
@@ -22,6 +23,9 @@ public class GOLDisplayPanel extends JPanel {
 
     private int mouseX;
     private int mouseY;
+
+    public boolean paused;
+    private Timer play;
 
     public GOLDisplayPanel(BufferedImage image){
         this.image = image;
@@ -33,10 +37,9 @@ public class GOLDisplayPanel extends JPanel {
         MAX_X = WIDTH - 1;
         MAX_Y = HEIGHT - 1;
 
-        ALIVE = Color.GREEN;
         GRIDLINES = Color.DARK_GRAY;
-        BACKGROUND = Color.LIGHT_GRAY;
         STROKEWIDTH = 1;
+        MILLESECONDS_BETWEEN_FRAMES = 300;
 
         Dimension size = new Dimension(WIDTH, HEIGHT);
         setMinimumSize(size);
@@ -44,15 +47,19 @@ public class GOLDisplayPanel extends JPanel {
         setPreferredSize(size);
 
         grid = new CellGrid();
-        reset();
+        drawCellGrid();
+        //drawGridLines();
+
+        initAnim();
+        paused = true;
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (e.getX() >= 0 && e.getX() <= MAX_X && e.getY() >= 0 && e.getY() <= MAX_Y) {
+                if (paused && e.getX() >= 0 && e.getX() <= MAX_X && e.getY() >= 0 && e.getY() <= MAX_Y) {
                     mouseX = e.getX();
                     mouseY = e.getY();
-                    invert();
+                    increment();
                 }
             }
         });
@@ -61,21 +68,16 @@ public class GOLDisplayPanel extends JPanel {
     public void step(){
         grid.step();
         drawCellGrid();
-        drawGridLines();
+        //drawGridLines();
         repaint();
     }
 
     private void drawCellGrid(){
         double side_length = (double)HEIGHT/(double)grid.numRows;
-        double pos = 0;
 
         for (int i = 0; i < grid.numRows; ++i){
             for (int j = 0; j < grid.numCols; ++j){
-                if (grid.getCells()[i][j].isAlive()){
-                    g2d.setColor(ALIVE);
-                } else {
-                    g2d.setColor(BACKGROUND);
-                }
+                g2d.setColor(grid.getColor(i, j));
 
                 double x = (double)j * side_length;
                 double y = (double)i * side_length;
@@ -84,10 +86,10 @@ public class GOLDisplayPanel extends JPanel {
         }
     }
 
-    private void invert(){
+    private void increment(){
         int row = mapY(mouseY);
         int col = mapX(mouseX);
-        grid.invert(row, col);
+        grid.increment(row, col);
         repaintSquare(row, col);
     }
 
@@ -100,17 +102,12 @@ public class GOLDisplayPanel extends JPanel {
     }
 
     private void repaintSquare(int row, int col){
-        if (grid.getCells()[row][col].isAlive()){
-            g2d.setColor(ALIVE);
-        } else {
-            g2d.setColor(BACKGROUND);
-        }
-
+        g2d.setColor(grid.getColor(row, col));
         double side_length = (double)HEIGHT/(double)grid.numRows;
         double x = (double)col * side_length;
         double y = (double)row * side_length;
         g2d.fill(new Rectangle2D.Double(x, y, side_length, side_length));
-        drawGridLines();
+        //drawGridLines();
         repaint();
     }
 
@@ -119,10 +116,30 @@ public class GOLDisplayPanel extends JPanel {
         g.drawImage(image, 0, 0, this);
     }
 
+    private void initAnim(){
+        play = new Timer(MILLESECONDS_BETWEEN_FRAMES, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                play.stop();
+                step();
+                play.start();
+            }
+        });
+    }
+
+    public void animate(){
+        paused = false;
+        play.start();
+    }
+
+    public void pause(){
+        paused = true;
+        play.stop();
+    }
+
     private void reset(){
-        g2d.setColor(BACKGROUND);
-        g2d.fillRect(0, 0, WIDTH, HEIGHT);
-        drawGridLines();
+        this.grid = new CellGrid();
+        drawCellGrid();
         repaint();
     }
 
@@ -139,5 +156,4 @@ public class GOLDisplayPanel extends JPanel {
             g2d.draw(new Line2D.Double(pos, 0, pos, MAX_Y));
         }
     }
-
 }
