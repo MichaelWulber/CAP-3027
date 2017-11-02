@@ -7,12 +7,12 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.Random;
 
 public class GOLDisplayPanel extends JPanel {
     private final int WIDTH, MAX_X;
     private final int HEIGHT, MAX_Y;
 
-    private Color GRIDLINES;
     private int STROKEWIDTH;
     private int MILLESECONDS_BETWEEN_FRAMES;
 
@@ -37,9 +37,8 @@ public class GOLDisplayPanel extends JPanel {
         MAX_X = WIDTH - 1;
         MAX_Y = HEIGHT - 1;
 
-        GRIDLINES = Color.DARK_GRAY;
         STROKEWIDTH = 1;
-        MILLESECONDS_BETWEEN_FRAMES = 300;
+        MILLESECONDS_BETWEEN_FRAMES = 100;
 
         Dimension size = new Dimension(WIDTH, HEIGHT);
         setMinimumSize(size);
@@ -48,7 +47,6 @@ public class GOLDisplayPanel extends JPanel {
 
         grid = new CellGrid();
         drawCellGrid();
-        //drawGridLines();
 
         initAnim();
         paused = true;
@@ -68,7 +66,6 @@ public class GOLDisplayPanel extends JPanel {
     public void step(){
         grid.step();
         drawCellGrid();
-        //drawGridLines();
         repaint();
     }
 
@@ -107,7 +104,6 @@ public class GOLDisplayPanel extends JPanel {
         double x = (double)col * side_length;
         double y = (double)row * side_length;
         g2d.fill(new Rectangle2D.Double(x, y, side_length, side_length));
-        //drawGridLines();
         repaint();
     }
 
@@ -137,23 +133,32 @@ public class GOLDisplayPanel extends JPanel {
         play.stop();
     }
 
-    private void reset(){
-        this.grid = new CellGrid();
+    public void reset(){
+        for (int i = 0; i < grid.numRows; ++i){
+            for (int j = 0; j < grid.numCols; ++j) {
+                grid.getCells()[i][j].state = Cell.DEAD;
+            }
+        }
         drawCellGrid();
         repaint();
     }
 
-    private void drawGridLines(){
-        g2d.setColor(GRIDLINES);
-        g2d.setStroke(new BasicStroke(STROKEWIDTH));
-
-        double side_length = (double)MAX_Y/(double)grid.numRows;
-        double pos = 0;
-
-        for (int i = 0; i <= grid.numCols; ++i){
-            pos = (side_length * i > MAX_Y) ? MAX_Y : side_length * i;
-            g2d.draw(new Line2D.Double(0.0, pos, MAX_X, pos));
-            g2d.draw(new Line2D.Double(pos, 0, pos, MAX_Y));
+    public void randomWorld(double prob){
+        Random rng = new Random();
+        for (int i = 0; i < grid.numRows; ++i){
+            for (int j = 0; j < grid.numCols; ++j) {
+                if (rng.nextDouble() > prob) {
+                    grid.getCells()[i][j].state = Cell.ALIVE;
+                } else {
+                    grid.getCells()[i][j].state = Cell.DEAD;
+                }
+            }
         }
+        drawCellGrid();
+        repaint();
+    }
+
+    public BufferedImage getImage(){
+        return image;
     }
 }

@@ -50,20 +50,20 @@ public class ImageFrame extends JFrame {
         JMenu fileMenu = new JMenu("File");
 
         // begin
-        JMenuItem begin = new JMenuItem("begin");
+        JMenuItem begin = new JMenuItem("Randomly populated world");
         begin.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // ...
+                genRandomWorld();
             }
         });
 
         fileMenu.add(begin);
 
         // stop
-        JMenuItem stop = new JMenuItem("stop");
+        JMenuItem stop = new JMenuItem("Empty world");
         stop.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // ...
+                panel.reset();
             }
         });
 
@@ -95,6 +95,20 @@ public class ImageFrame extends JFrame {
         this.setJMenuBar(menuBar);
     }
 
+    private void genRandomWorld(){
+        try {
+            // get user input
+            String d = JOptionPane.showInputDialog("What would you like probability that a cell is alive to be?");
+            double prob = Double.valueOf(d);
+            if (prob < 0 || prob > 1){
+                throw new Exception("please enter a value between 0.0 and 1.0");
+            }
+            panel.randomWorld( (1.0 - prob) );
+        } catch (Exception e){
+            JOptionPane.showMessageDialog(null, e, "error", JOptionPane.ERROR_MESSAGE );
+        }
+    }
+
     private void saveImage(){
         try
         {
@@ -103,7 +117,7 @@ public class ImageFrame extends JFrame {
             if (outputFile == null) {
                 throw new Exception();
             }
-            javax.imageio.ImageIO.write( image, "png", outputFile );
+            javax.imageio.ImageIO.write( panel.getImage(), "png", outputFile );
         }
         catch ( Exception e )
         {
