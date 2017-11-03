@@ -3,6 +3,7 @@
 // Java 3D Tutorial
 
 import javax.swing.*;
+import java.awt.*;
 
 public class Launcher {
 
@@ -16,7 +17,7 @@ public class Launcher {
     }
 
     private static void createAndShowGUI(){
-        ApplicationWindow window = new ApplicationWindow();
+        ApplicationWindow window = new ApplicationWindow(Toolkit.getDefaultToolkit().getScreenSize());
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.pack();
         window.setVisible(true);

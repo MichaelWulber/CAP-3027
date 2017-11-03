@@ -7,12 +7,11 @@ import java.awt.event.ActionListener;
 public class ApplicationWindow extends JFrame{
     private final Display panel;
 
-    public ApplicationWindow() {
+    public ApplicationWindow(Dimension screenSize) {
         // frame attributes
         this.setTitle("3D Tutorial - Michael Wulber");
-        this.setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
-
-        this.panel = new Display();
+        this.setPreferredSize(screenSize);
+        this.panel = new Display(screenSize.width, screenSize.height);
         this.getContentPane().add(panel, BorderLayout.CENTER);
 
         // add a menu to the frame
