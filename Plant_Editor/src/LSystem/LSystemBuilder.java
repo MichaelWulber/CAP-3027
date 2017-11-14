@@ -4,6 +4,8 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Cylinder;
+import javafx.scene.shape.DrawMode;
+import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 
@@ -39,9 +41,10 @@ public class LSystemBuilder {
         return index;
     }
 
-    public Group getPlantParts() {
+    public LinkedList<Sphere[]> getPlantParts() {
         StringBuilder instructions = stringGenerator();
-        Group plantParts = new Group();
+        System.out.println(instructions);
+        LinkedList<Sphere[]> plantParts = new LinkedList<Sphere[]>();
 
         GrowingState state = new GrowingState(lsd.scale);
         LinkedList<GrowingState> states = new LinkedList<GrowingState>();
@@ -51,22 +54,22 @@ public class LSystemBuilder {
         for (int i = 0; i < instructions.length(); ++i){
             c = instructions.charAt(i);
             if (c == 'F'){
-                plantParts.getChildren().add(getPart(state));
+                plantParts.add(getPart(state));
                 grow(state);
             } else if (c == 'f'){
                 grow(state);
             } else if (c == 'I'){
-                plantParts.getChildren().add(getPart(state));
+                plantParts.add(getPart(state));
                 grow(state);
             } else if (c == 'i'){
                 grow(state);
             } else if (c == 'J'){
-                plantParts.getChildren().add(getPart(state));
+                plantParts.add(getPart(state));
                 grow(state);
             } else if (c == 'j'){
                 grow(state);
             } else if (c == 'K'){
-                plantParts.getChildren().add(getPart(state));
+                plantParts.add(getPart(state));
                 grow(state);
             } else if (c == 'k'){
                 grow(state);
@@ -84,9 +87,10 @@ public class LSystemBuilder {
                 state.roll -= lsd.dRoll;
             } else if (c == '['){
                 states.push(new GrowingState(state));
+//                System.out.println("Branched at: " + (state.posX) + ", " + (state.posY) + ", " + (state.posZ));
             } else if (c == ']'){
                 state = states.pop();
-                //draw leaves/flowers here?
+//                System.out.println("Returned to: " + (state.posX) + ", " + (state.posY) + ", " + (state.posZ));
             }
 //            System.out.println(state.posX + ", " + state.posY + ", " + state.posZ);
         }
@@ -94,42 +98,49 @@ public class LSystemBuilder {
         return plantParts;
     }
 
-    private Cylinder getPart(GrowingState gs){
+    private Sphere[] getPart(GrowingState gs){
         // *** THINGS THAT WILL BE VARIABLE IN THE FUTURE ***
         PhongMaterial greenMaterial = new PhongMaterial();
         greenMaterial.setDiffuseColor(Color.LIGHTGREEN);
         greenMaterial.setSpecularColor(Color.GREEN);
-        // *** END ***
 
-        // create mesh
-        Cylinder cylinder = new Cylinder(gs.radius, gs.stepSize);
+        int resolution = 10;
+        // *** END ***
 
         // create transforms
         double[] vec = getVec(gs);
-        System.out.println("Plotted at: " + (gs.posX + vec[0]/2) + ", " + (gs.posY + vec[1]/2) + ", " + (gs.posZ + vec[2]/2));
-        System.out.println("vec: " + vec[0] + ", " + vec[1] + ", " + vec[2]);
-        System.out.println("pitch: " + gs.pitch + " yaw: " + gs.yaw + " roll: " + gs.roll);
-        Translate t = new Translate(gs.posX + vec[0]/2, gs.posY + vec[1]/2, gs.posZ + vec[2]/2);
+//        System.out.println("vec: " + vec[0] + ", " + vec[1] + ", " + vec[2]);
+//        System.out.println("pitch: " + gs.pitch + " yaw: " + gs.yaw + " roll: " + gs.roll);
+//        System.out.println("Line at: (" + (gs.posX) + ", " + (gs.posY) + ", " + (gs.posZ) + ") , (" + (gs.posX + vec[0]) + ", " + (gs.posY + vec[1]) + ", " + (gs.posZ + vec[2]) + ")");
+        Sphere[] spheres = new Sphere[resolution];
 
-        Rotate rx = new Rotate();
-        rx.setAxis(Rotate.X_AXIS);
-        //rx.setPivotX(gs.posX);
-        rx.setAngle(gs.pitch);
+        double dx = vec[0]/(resolution - 1);
+        double dy = vec[1]/(resolution - 1);
+        double dz = vec[2]/(resolution - 1);
 
-        Rotate ry = new Rotate();
-        ry.setAxis(Rotate.Y_AXIS);
-        //ry.setPivotY(gs.posY);
-        ry.setAngle(gs.yaw);
+        double xx = gs.posX;
+        double yy = gs.posY;
+        double zz = gs.posZ;
 
-        Rotate rz = new Rotate();
-        rz.setAxis(Rotate.Z_AXIS);
-        //rz.setPivotZ(gs.posZ);
-        rz.setAngle(gs.roll);
+        for (int i = 0; i < resolution; i++){
+            spheres[i] = new Sphere(10, 5);
+//            spheres[i].setMaterial(greenMaterial);
+            spheres[i].setDrawMode(DrawMode.LINE);
 
-        // add tranforms and material
-        cylinder.getTransforms().addAll(rx, ry, rz, t);
-        cylinder.setMaterial(greenMaterial);
-        return cylinder;
+            spheres[i].setTranslateX(xx);
+            spheres[i].setTranslateY(-yy);
+            spheres[i].setTranslateZ(zz);
+
+//            if (i == resolution - 1){
+//                System.out.println("Actual line at: (" + (gs.posX) + ", " + (gs.posY) + ", " + (gs.posZ) + ") , (" + (xx) + ", " + (yy) + ", " + (zz) + ")\n");
+//            }
+            xx += dx;
+            yy += dy;
+            zz += dz;
+        }
+
+
+        return spheres;
     }
 
     private void grow(GrowingState gs){

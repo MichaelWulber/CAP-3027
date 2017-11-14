@@ -9,6 +9,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
@@ -40,11 +41,11 @@ public class EditorScene extends Scene {
         this.color = Color.LIGHTGREEN;
 
         this.plant = new LSystemDescription();
-        plant.branchingDegree = 4;
-        plant.dRoll = 30;
+        plant.branchingDegree = 7;
+        plant.dRoll = 25.7;
         plant.scale = 50;
         plant.seed = new StringBuilder("X");
-        plant.rules.put('X', new StringBuilder("F[&X]F[^X]&X"));
+        plant.rules.put('X', new StringBuilder("F[&X][^X]FX"));
         plant.rules.put('F', new StringBuilder("FF"));
 
         this.builder = new LSystemBuilder(plant);
@@ -86,27 +87,38 @@ public class EditorScene extends Scene {
         display.setFill(Color.LIGHTGRAY);
         ((BorderPane)this.getRoot()).setLeft(display);
 
-        // *** REMOVE ***
-        PhongMaterial testMaterial = new PhongMaterial();
-        testMaterial.setSpecularColor(Color.LIGHTSALMON);
-        testMaterial.setDiffuseColor(Color.SKYBLUE);
+//        // *** REMOVE ***
+//        PhongMaterial testMaterial = new PhongMaterial();
+//        testMaterial.setSpecularColor(Color.LIGHTSALMON);
+//        testMaterial.setDiffuseColor(Color.SKYBLUE);
+//
+//        Sphere testSphere = new Sphere(100, 25);
+//        testSphere.setMaterial(testMaterial);
+//        testSphere.setDrawMode(DrawMode.FILL);
+//        root.getChildren().add(testSphere);
+//        // *** END ***
 
-        Sphere testSphere = new Sphere(100, 25);
-        testSphere.setMaterial(testMaterial);
-        testSphere.setDrawMode(DrawMode.FILL);
-        root.getChildren().add(testSphere);
-        // *** END ***
-//        Group plantParts = builder.getPlantParts();
+        int count = 0;
+        for (Sphere[] spheres : builder.getPlantParts()){
+                System.out.println("Line at: (" + spheres[0].getTranslateX() + ", " + spheres[0].getTranslateY() + ", " + spheres[0].getTranslateZ() +
+                        ") , (" + spheres[spheres.length - 1].getTranslateX() + ", " + spheres[spheres.length - 1].getTranslateY() + ", " + spheres[spheres.length - 1].getTranslateZ() + ")");
+            for (int i = 0; i < spheres.length; ++i) {
+                root.getChildren().add(spheres[i]);
+                System.out.println("\tSphere at: (" + spheres[i].getTranslateX() + ", " + spheres[i].getTranslateY() + ", " + spheres[i].getTranslateZ() + ")");
+            }
+            count++;
+        }
+        System.out.println(count);
 
         // camera transform
 
 
         // add camera
         PerspectiveCamera camera = new PerspectiveCamera(true);
-        camera.setFieldOfView(35);
-        camera.setTranslateZ(-2000);
-        camera.setNearClip(0.01);
-        camera.setFarClip(4000);
+        camera.setFieldOfView(45);
+        camera.setTranslateZ(-20000);
+        camera.setNearClip(0.001);
+        camera.setFarClip(25000);
         camera.setOnKeyPressed(e -> {
             switch (e.getCode()){
                 case UP:
@@ -185,6 +197,6 @@ public class EditorScene extends Scene {
     }
 
     private void redraw(){
-        plantParts = builder.getPlantParts();
+        //plantParts = builder.getPlantParts();
     }
 }
