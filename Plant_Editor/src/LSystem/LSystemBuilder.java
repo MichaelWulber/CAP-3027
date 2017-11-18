@@ -1,5 +1,7 @@
 package LSystem;
 
+import Plant.PlantComponent;
+import Plant.Root;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
@@ -13,6 +15,7 @@ import java.util.LinkedList;
 
 public class LSystemBuilder {
     private LSystemDescription lsd;
+    private PlantComponent plant;
 
     public LSystemBuilder(LSystemDescription lsd){
         this.lsd = lsd;
@@ -45,6 +48,7 @@ public class LSystemBuilder {
         StringBuilder instructions = stringGenerator();
         System.out.println(instructions);
         LinkedList<Sphere[]> plantParts = new LinkedList<Sphere[]>();
+        plant = new Root();
 
         GrowingState state = new GrowingState(lsd.scale);
         LinkedList<GrowingState> states = new LinkedList<GrowingState>();
@@ -87,6 +91,7 @@ public class LSystemBuilder {
                 state.roll -= lsd.dRoll;
             } else if (c == '['){
                 states.push(new GrowingState(state));
+
 //                System.out.println("Branched at: " + (state.posX) + ", " + (state.posY) + ", " + (state.posZ));
             } else if (c == ']'){
                 state = states.pop();

@@ -2,6 +2,8 @@ package app;
 
 import LSystem.LSystemBuilder;
 import LSystem.LSystemDescription;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Orientation;
 import javafx.scene.*;
 import javafx.scene.control.*;
@@ -15,6 +17,7 @@ import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 
+import javax.swing.*;
 import javax.xml.crypto.dsig.Transform;
 
 public class EditorScene extends Scene {
@@ -100,15 +103,15 @@ public class EditorScene extends Scene {
 
         int count = 0;
         for (Sphere[] spheres : builder.getPlantParts()){
-                System.out.println("Line at: (" + spheres[0].getTranslateX() + ", " + spheres[0].getTranslateY() + ", " + spheres[0].getTranslateZ() +
-                        ") , (" + spheres[spheres.length - 1].getTranslateX() + ", " + spheres[spheres.length - 1].getTranslateY() + ", " + spheres[spheres.length - 1].getTranslateZ() + ")");
+//                System.out.println("Line at: (" + spheres[0].getTranslateX() + ", " + spheres[0].getTranslateY() + ", " + spheres[0].getTranslateZ() +
+//                        ") , (" + spheres[spheres.length - 1].getTranslateX() + ", " + spheres[spheres.length - 1].getTranslateY() + ", " + spheres[spheres.length - 1].getTranslateZ() + ")");
             for (int i = 0; i < spheres.length; ++i) {
                 root.getChildren().add(spheres[i]);
-                System.out.println("\tSphere at: (" + spheres[i].getTranslateX() + ", " + spheres[i].getTranslateY() + ", " + spheres[i].getTranslateZ() + ")");
+//                System.out.println("\tSphere at: (" + spheres[i].getTranslateX() + ", " + spheres[i].getTranslateY() + ", " + spheres[i].getTranslateZ() + ")");
             }
             count++;
         }
-        System.out.println(count);
+//        System.out.println(count);
 
         // camera transform
 
@@ -159,6 +162,13 @@ public class EditorScene extends Scene {
         branchingSlider.setOrientation(Orientation.HORIZONTAL);
         branchingSlider.setMajorTickUnit(1.0);
         branchingSlider.setPrefWidth(150);
+        branchingSlider.valueProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+
+            }
+        });
+
         branchingSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             branchingSlider.setValue(newVal.intValue());
             branchingLabel.setText("degree of branching: " + branchingSlider.getValue());
