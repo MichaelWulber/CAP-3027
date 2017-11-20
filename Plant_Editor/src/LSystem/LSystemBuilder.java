@@ -1,5 +1,6 @@
 package LSystem;
 
+import Plant.PlantBranch;
 import Plant.PlantComponent;
 import Plant.Root;
 import javafx.scene.Group;
@@ -15,7 +16,6 @@ import java.util.LinkedList;
 
 public class LSystemBuilder {
     private LSystemDescription lsd;
-    private PlantComponent plant;
 
     public LSystemBuilder(LSystemDescription lsd){
         this.lsd = lsd;
@@ -44,38 +44,45 @@ public class LSystemBuilder {
         return index;
     }
 
-    public LinkedList<Sphere[]> getPlantParts() {
+    public PlantComponent getPlantParts() {
         StringBuilder instructions = stringGenerator();
+
+        //debug
         System.out.println(instructions);
-        LinkedList<Sphere[]> plantParts = new LinkedList<Sphere[]>();
-        plant = new Root();
+
+        LinkedList<PlantComponent> plantStack = new LinkedList<PlantComponent>();
+        Root plant = new Root();
+        PlantComponent current = plant;
 
         GrowingState state = new GrowingState(lsd.scale);
         LinkedList<GrowingState> states = new LinkedList<GrowingState>();
 
+        // reuse variables
         char c;
+        PlantBranch branch;
 
         for (int i = 0; i < instructions.length(); ++i){
             c = instructions.charAt(i);
-            if (c == 'F'){
-                plantParts.add(getPart(state));
-                grow(state);
-            } else if (c == 'f'){
+            if (c == 'F') {
+                branch = getBranch(state);
+                current.addChild(branch);
+                System.out.println(current.getChildren().size());
+                current = branch;
                 grow(state);
             } else if (c == 'I'){
-                plantParts.add(getPart(state));
-                grow(state);
-            } else if (c == 'i'){
+                branch = getBranch(state);
+                current.addChild(branch);
+                current = branch;
                 grow(state);
             } else if (c == 'J'){
-                plantParts.add(getPart(state));
-                grow(state);
-            } else if (c == 'j'){
+                branch = getBranch(state);
+                current.addChild(branch);
+                current = branch;
                 grow(state);
             } else if (c == 'K'){
-                plantParts.add(getPart(state));
-                grow(state);
-            } else if (c == 'k'){
+                branch = getBranch(state);
+                current.addChild(branch);
+                current = branch;
                 grow(state);
             } else if (c == '+'){
                 state.pitch += lsd.dPitch;
@@ -91,26 +98,28 @@ public class LSystemBuilder {
                 state.roll -= lsd.dRoll;
             } else if (c == '['){
                 states.push(new GrowingState(state));
-
-//                System.out.println("Branched at: " + (state.posX) + ", " + (state.posY) + ", " + (state.posZ));
+                plantStack.push(current);
             } else if (c == ']'){
+                System.out.println("branch popped");
                 state = states.pop();
-//                System.out.println("Returned to: " + (state.posX) + ", " + (state.posY) + ", " + (state.posZ));
+                current = plantStack.pop();
             }
-//            System.out.println(state.posX + ", " + state.posY + ", " + state.posZ);
         }
 
-        return plantParts;
+        return plant;
     }
 
-    private Sphere[] getPart(GrowingState gs){
+    private PlantBranch getBranch(GrowingState gs){
         // *** THINGS THAT WILL BE VARIABLE IN THE FUTURE ***
         PhongMaterial greenMaterial = new PhongMaterial();
         greenMaterial.setDiffuseColor(Color.LIGHTGREEN);
         greenMaterial.setSpecularColor(Color.GREEN);
 
-        int resolution = 10;
+        int resolution = lsd.resolution;
         // *** END ***
+
+        // create plant branch
+        PlantBranch branch = new PlantBranch();
 
         // create transforms
         double[] vec = getVec(gs);
@@ -127,25 +136,25 @@ public class LSystemBuilder {
         double yy = gs.posY;
         double zz = gs.posZ;
 
+        Sphere sphere;
+
         for (int i = 0; i < resolution; i++){
-            spheres[i] = new Sphere(10, 5);
-//            spheres[i].setMaterial(greenMaterial);
-            spheres[i].setDrawMode(DrawMode.LINE);
+            sphere = new Sphere(lsd.radius, 3);
+            sphere.setMaterial(greenMaterial);
+            sphere.setDrawMode(DrawMode.FILL);
 
-            spheres[i].setTranslateX(xx);
-            spheres[i].setTranslateY(-yy);
-            spheres[i].setTranslateZ(zz);
+            sphere.setTranslateX(xx);
+            sphere.setTranslateY(-yy);
+            sphere.setTranslateZ(zz);
 
-//            if (i == resolution - 1){
-//                System.out.println("Actual line at: (" + (gs.posX) + ", " + (gs.posY) + ", " + (gs.posZ) + ") , (" + (xx) + ", " + (yy) + ", " + (zz) + ")\n");
-//            }
+            branch.addShape(sphere);
+
             xx += dx;
             yy += dy;
             zz += dz;
         }
 
-
-        return spheres;
+        return branch;
     }
 
     private void grow(GrowingState gs){
@@ -194,5 +203,9 @@ public class LSystemBuilder {
 //        gs.stepSize = gs.stepSize * 0.98;
 
         return vec;
+    }
+
+    public void setLsd(LSystemDescription lsd){
+        this.lsd = lsd;
     }
 }

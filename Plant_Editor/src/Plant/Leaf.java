@@ -1,5 +1,6 @@
 package Plant;
 
+import Plant.Plant_Iterators.Iter;
 import javafx.scene.shape.Shape3D;
 
 import java.util.LinkedList;
@@ -16,4 +17,8 @@ public class Leaf extends PlantComponent {
         this.shapes.add(shape);
     }
 
+    @Override
+    public Iter makeIter() {
+        return null;
+    }
 }

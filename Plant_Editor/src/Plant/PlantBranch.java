@@ -1,5 +1,7 @@
 package Plant;
 
+import Plant.Plant_Iterators.Iter;
+import Plant.Plant_Iterators.LinkedIter;
 import javafx.scene.shape.Shape3D;
 
 import java.util.LinkedList;
@@ -7,12 +9,6 @@ import java.util.LinkedList;
 public class PlantBranch extends PlantComponent {
     private LinkedList<Shape3D> shapes = null;
     private LinkedList<PlantComponent> children = null;
-
-    protected double rootX;
-    protected double rootY;
-    protected double length;
-    protected double rotateX;
-    protected double rotateY;
 
     public PlantBranch(){
         this.shapes = new LinkedList<Shape3D>();
@@ -32,17 +28,21 @@ public class PlantBranch extends PlantComponent {
     }
 
     @Override
-    public double getTipX() {
-        return rootX + Math.cos(rotateX) * length;
-    }
-
-    @Override
-    public double getTipY() {
-        return rootY + Math.sin(rotateY) * length;
-    }
-
-    @Override
     public void addShape(Shape3D shape) {
         this.shapes.add(shape);
+    }
+
+    @Override
+    public Iter makeIter() {
+        return new LinkedIter(this.children);
+    }
+
+    @Override
+    public LinkedList<Shape3D> getShapes() {
+        return shapes;
+    }
+
+    public LinkedList<PlantComponent> getChildren() {
+        return children;
     }
 }

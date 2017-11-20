@@ -2,6 +2,8 @@ package app;
 
 import LSystem.LSystemBuilder;
 import LSystem.LSystemDescription;
+import Plant.PlantComponent;
+import Plant.Plant_Iterators.Iter;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Orientation;
@@ -13,6 +15,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.DrawMode;
+import javafx.scene.shape.Shape3D;
 import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
@@ -26,7 +29,8 @@ public class EditorScene extends Scene {
     final private int DEFAULT_BRANCHING_DEGREE = 1;
 
     private Stage primaryStage;
-    private Group plantParts;
+    Group root;
+    SubScene display;
 
     private int width;
     private int height;
@@ -44,12 +48,16 @@ public class EditorScene extends Scene {
         this.color = Color.LIGHTGREEN;
 
         this.plant = new LSystemDescription();
-        plant.branchingDegree = 7;
-        plant.dRoll = 25.7;
+        plant.branchingDegree = 4;
+        plant.dRoll = 30;
+        plant.dPitch = 30;
+        plant.dYaw = 30;
         plant.scale = 50;
+        plant.radius = 10;
+        plant.resolution = 10;
         plant.seed = new StringBuilder("X");
-        plant.rules.put('X', new StringBuilder("F[&X][^X]FX"));
-        plant.rules.put('F', new StringBuilder("FF"));
+        plant.addRule('X', new StringBuilder("F[+X][-X]FX"));
+        plant.addRule('F', new StringBuilder("&+FF"));
 
         this.builder = new LSystemBuilder(plant);
 
@@ -85,41 +93,27 @@ public class EditorScene extends Scene {
     }
 
     private void initDisplay(){
-        Group root = new Group();
-        SubScene display = new SubScene(root, width * (3.0/4.0), height, true, SceneAntialiasing.BALANCED);
+        root = new Group();
+        display = new SubScene(root, width * (3.0/4.0), height, true, SceneAntialiasing.BALANCED);
         display.setFill(Color.LIGHTGRAY);
         ((BorderPane)this.getRoot()).setLeft(display);
 
-//        // *** REMOVE ***
-//        PhongMaterial testMaterial = new PhongMaterial();
-//        testMaterial.setSpecularColor(Color.LIGHTSALMON);
-//        testMaterial.setDiffuseColor(Color.SKYBLUE);
-//
-//        Sphere testSphere = new Sphere(100, 25);
-//        testSphere.setMaterial(testMaterial);
-//        testSphere.setDrawMode(DrawMode.FILL);
-//        root.getChildren().add(testSphere);
-//        // *** END ***
-
         int count = 0;
-        for (Sphere[] spheres : builder.getPlantParts()){
-//                System.out.println("Line at: (" + spheres[0].getTranslateX() + ", " + spheres[0].getTranslateY() + ", " + spheres[0].getTranslateZ() +
-//                        ") , (" + spheres[spheres.length - 1].getTranslateX() + ", " + spheres[spheres.length - 1].getTranslateY() + ", " + spheres[spheres.length - 1].getTranslateZ() + ")");
-            for (int i = 0; i < spheres.length; ++i) {
-                root.getChildren().add(spheres[i]);
-//                System.out.println("\tSphere at: (" + spheres[i].getTranslateX() + ", " + spheres[i].getTranslateY() + ", " + spheres[i].getTranslateZ() + ")");
+        PlantComponent plant = builder.getPlantParts();
+        Iter iter =  plant.makePreOrderIter();
+        for (iter.reset(); iter.isValid(); iter.next()){
+            for (Shape3D shape : iter.currentItem().getShapes()){
+                root.getChildren().add(shape);
             }
             count++;
         }
-//        System.out.println(count);
-
-        // camera transform
+        System.out.println(count);
 
 
         // add camera
         PerspectiveCamera camera = new PerspectiveCamera(true);
         camera.setFieldOfView(45);
-        camera.setTranslateZ(-20000);
+        camera.setTranslateZ(-2000);
         camera.setNearClip(0.001);
         camera.setFarClip(25000);
         camera.setOnKeyPressed(e -> {
@@ -182,8 +176,7 @@ public class EditorScene extends Scene {
         radiusSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             radiusSlider.setValue(newVal.intValue());
             radiusLabel.setText("initial branch radius: " + radiusSlider.getValue());
-            // plant.setRadius(newVal.intValue());
-            // plant.display();
+            plant.radius = newVal.doubleValue();
         });
 
         Button colorSelection = new Button("color");
@@ -191,6 +184,11 @@ public class EditorScene extends Scene {
         colorSelection.setOnAction(e -> {
             ColorSelector.display();
             this.plant.color = ColorSelector.color;
+        });
+
+        Button render = new Button("render");
+        render.setPrefWidth(150);
+        render.setOnAction(e -> {
             redraw();
         });
 
@@ -198,7 +196,7 @@ public class EditorScene extends Scene {
 
         tools.getChildren().addAll(branchingLabel, branchingSlider,
                 radiusLabel, radiusSlider,
-                colorSelection);
+                colorSelection, render);
     }
 
     private void getSelectedColor(){
@@ -207,6 +205,14 @@ public class EditorScene extends Scene {
     }
 
     private void redraw(){
-        //plantParts = builder.getPlantParts();
+        root.getChildren().clear();
+        builder.setLsd(plant);
+        PlantComponent plant = builder.getPlantParts();
+        Iter iter =  plant.makePreOrderIter();
+        for (iter.reset(); iter.isValid(); iter.next()){
+            for (Shape3D shape : iter.currentItem().getShapes()){
+                root.getChildren().add(shape);
+            }
+        }
     }
 }
