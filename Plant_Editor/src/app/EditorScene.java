@@ -7,11 +7,13 @@ import Plant.Plant_Iterators.Iter;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.DrawMode;
@@ -24,9 +26,13 @@ import javax.swing.*;
 import javax.xml.crypto.dsig.Transform;
 
 public class EditorScene extends Scene {
+    final public static int EDITOR_SCENE_WIDTH = 800;
+    final public static int EDITOR_SCENE_HEIGHT = 600;
+    final private int SUBSCENE_WIDTH = 600;
+    final private int VBOX_WIDTH = 200;
 
     final private Color DEFAULT_COLOR = Color.BLACK;
-    final private int DEFAULT_BRANCHING_DEGREE = 1;
+    final private int DEFAULT_BRANCHING_DEGREE = 0;
 
     private Stage primaryStage;
     Group root;
@@ -39,26 +45,29 @@ public class EditorScene extends Scene {
     private LSystemDescription plant;
     private LSystemBuilder builder;
 
-    public EditorScene(int width, int height, Stage primaryStage){
-        super(new BorderPane(), width, height);
+    public EditorScene(int width, int height, LSystemDescription lsd, Stage primaryStage){
+        super(new BorderPane());
+        this.primaryStage = primaryStage;
+        this.width = width;
+        this.height = height;
+        this.color = Color.LIGHTGREEN;
 
+        this.plant = lsd;
+        this.builder = new LSystemBuilder(plant);
+
+        initMenuBar();
+        initDisplay();
+        initTools();
+    }
+
+    public EditorScene(int width, int height, Stage primaryStage){
+        super(new BorderPane());
         this.primaryStage = primaryStage;
         this.width = width;
         this.height = height;
         this.color = Color.LIGHTGREEN;
 
         this.plant = new LSystemDescription();
-        plant.branchingDegree = 4;
-        plant.dRoll = 30;
-        plant.dPitch = 30;
-        plant.dYaw = 30;
-        plant.scale = 50;
-        plant.radius = 10;
-        plant.resolution = 10;
-        plant.seed = new StringBuilder("X");
-        plant.addRule('X', new StringBuilder("F[+X][-X]FX"));
-        plant.addRule('F', new StringBuilder("&+FF"));
-
         this.builder = new LSystemBuilder(plant);
 
         initMenuBar();
@@ -75,7 +84,7 @@ public class EditorScene extends Scene {
         // --- new plant ---
         MenuItem new_plant = new MenuItem("new plant");
         new_plant.setOnAction(e -> {
-            primaryStage.setScene(new EditorScene(800, 400, primaryStage));
+            primaryStage.setScene(new EditorScene(EDITOR_SCENE_WIDTH, EDITOR_SCENE_HEIGHT, primaryStage));
         });
 
         // --- exit ---
@@ -94,7 +103,7 @@ public class EditorScene extends Scene {
 
     private void initDisplay(){
         root = new Group();
-        display = new SubScene(root, width * (3.0/4.0), height, true, SceneAntialiasing.BALANCED);
+        display = new SubScene(root, SUBSCENE_WIDTH, EDITOR_SCENE_HEIGHT, true, SceneAntialiasing.BALANCED);
         display.setFill(Color.LIGHTGRAY);
         ((BorderPane)this.getRoot()).setLeft(display);
 
@@ -109,31 +118,55 @@ public class EditorScene extends Scene {
         }
         System.out.println(count);
 
-
         // add camera
         PerspectiveCamera camera = new PerspectiveCamera(true);
         camera.setFieldOfView(45);
         camera.setTranslateZ(-2000);
         camera.setNearClip(0.001);
         camera.setFarClip(25000);
-        camera.setOnKeyPressed(e -> {
-            switch (e.getCode()){
-                case UP:
-                    System.out.println("up");
-                    // positive rotation about x
-                    break;
-                case DOWN:
-                    System.out.println("down");
-                    // positive rotation about x
-                    break;
-                case RIGHT:
-                    System.out.println("right");
-                    // positive rotation about y
-                    break;
-                case LEFT:
-                    System.out.println("left");
-                    // positive rotation about y
-                    break;
+
+//        Rotate rx = new Rotate(0, Rotate.X_AXIS);
+//        Rotate ry = new Rotate(0, Rotate.Y_AXIS);
+        Rotate rotateX = new Rotate(0, -camera.getTranslateX(), -camera.getTranslateY(), -camera.getTranslateZ(), Rotate.X_AXIS);
+        Rotate rotateY = new Rotate(0, -camera.getTranslateX(), -camera.getTranslateY(), -camera.getTranslateZ(), Rotate.Y_AXIS);
+
+        camera.getTransforms().addAll(rotateX, rotateY);
+        this.getRoot().setOnKeyPressed(e -> {
+            if (e.getCode().equals(KeyCode.W)) {
+                rotateX.setAngle(rotateX.getAngle() + 2.0);
+            } else if (e.getCode().equals(KeyCode.S)) {
+                rotateX.setAngle(rotateX.getAngle() - 2.0);
+            } else if (e.getCode().equals(KeyCode.D)){
+                rotateY.setAngle(rotateY.getAngle() - 2.0);
+            } else if (e.getCode().equals(KeyCode.A)) {
+                rotateY.setAngle(rotateY.getAngle() + 2.0);
+            } else if (e.getCode().equals(KeyCode.R)) {
+                rotateX.setAngle(0.0);
+                rotateY.setAngle(0.0);
+            } else if (e.getCode().equals(KeyCode.Z)){
+                camera.setTranslateX(camera.getTranslateX() * 1.01);
+                camera.setTranslateY(camera.getTranslateY() * 1.01);
+                camera.setTranslateZ(camera.getTranslateZ() * 1.01);
+
+                rotateX.setPivotX(-camera.getTranslateX());
+                rotateX.setPivotY(-camera.getTranslateY());
+                rotateX.setPivotZ(-camera.getTranslateZ());
+
+                rotateY.setPivotX(-camera.getTranslateX());
+                rotateY.setPivotY(-camera.getTranslateY());
+                rotateY.setPivotZ(-camera.getTranslateZ());
+            } else if (e.getCode().equals(KeyCode.X)){
+                camera.setTranslateX(camera.getTranslateX() * 0.99);
+                camera.setTranslateY(camera.getTranslateY() * 0.99);
+                camera.setTranslateZ(camera.getTranslateZ() * 0.99);
+
+                rotateX.setPivotX(-camera.getTranslateX());
+                rotateX.setPivotY(-camera.getTranslateY());
+                rotateX.setPivotZ(-camera.getTranslateZ());
+
+                rotateY.setPivotX(-camera.getTranslateX());
+                rotateY.setPivotY(-camera.getTranslateY());
+                rotateY.setPivotZ(-camera.getTranslateZ());
             }
         });
         display.setCamera(camera);
@@ -148,54 +181,140 @@ public class EditorScene extends Scene {
 
     private void initTools() {
         VBox tools = new VBox();
+        tools.setPrefWidth(VBOX_WIDTH);
+        tools.setSpacing(10);
+        tools.setAlignment(Pos.TOP_CENTER);
+        tools.getContentBias();
+
         ((BorderPane) this.getRoot()).setRight(tools);
 
-        // tools
-        Label branchingLabel = new Label("degree of branching: 0");
-        Slider branchingSlider = new Slider(0, 10, DEFAULT_BRANCHING_DEGREE);
+        Label branchingLabel = new Label("Degree of Branching: " + plant.branchingDegree);
+        Slider branchingSlider = new Slider(0, 10, plant.branchingDegree);
         branchingSlider.setOrientation(Orientation.HORIZONTAL);
-        branchingSlider.setMajorTickUnit(1.0);
         branchingSlider.setPrefWidth(150);
-        branchingSlider.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-
-            }
-        });
-
+        branchingSlider.setMaxWidth(150);
         branchingSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             branchingSlider.setValue(newVal.intValue());
-            branchingLabel.setText("degree of branching: " + branchingSlider.getValue());
+            branchingLabel.setText("Degree of Branching: " + branchingSlider.getValue());
             plant.branchingDegree = newVal.intValue();
         });
 
-        Label radiusLabel = new Label("initial branch radius: 1");
-        Slider radiusSlider = new Slider(1, 100, 1.0);
+        Label radiusLabel = new Label("Initial Branch Radius: " + plant.radius);
+        Slider radiusSlider = new Slider(1, 100, plant.radius);
         radiusSlider.setOrientation(Orientation.HORIZONTAL);
         radiusSlider.setPrefWidth(150);
+        radiusSlider.setMaxWidth(150);
         radiusSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             radiusSlider.setValue(newVal.intValue());
-            radiusLabel.setText("initial branch radius: " + radiusSlider.getValue());
+            radiusLabel.setText("Initial Branch Radius: " + radiusSlider.getValue());
             plant.radius = newVal.doubleValue();
         });
 
-        Button colorSelection = new Button("color");
-        colorSelection.setPrefWidth(150);
-        colorSelection.setOnAction(e -> {
-            ColorSelector.display();
-            this.plant.color = ColorSelector.color;
+        Label thinningLabel = new Label("Branch Thinning Rate: " + plant.shrinkRate);
+        Slider thinningSlider = new Slider(0.0, 1.0, plant.shrinkRate);
+        thinningSlider.setOrientation(Orientation.HORIZONTAL);
+        thinningSlider.setPrefWidth(150);
+        thinningSlider.setMaxWidth(150);
+        thinningSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            thinningSlider.setValue(newVal.floatValue());
+            thinningLabel.setText( "Branch Thinning Rate: " + String.format("%.2f", thinningSlider.getValue()) );
+            plant.shrinkRate = newVal.doubleValue();
         });
 
-        Button render = new Button("render");
+        Label stepLabel = new Label("Scale: " + plant.scale);
+        Slider stepSlider = new Slider(1, 100, plant.scale);
+        stepSlider.setOrientation(Orientation.HORIZONTAL);
+        stepSlider.setPrefWidth(150);
+        stepSlider.setMaxWidth(150);
+        stepSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            stepSlider.setValue(newVal.intValue());
+            stepLabel.setText("Scale: " + stepSlider.getValue());
+            plant.scale = newVal.doubleValue();
+        });
+
+        Label xAngleDeltaLabel = new Label("X Angle Delta: " + plant.dPitch);
+        Slider xAngleDeltaSlider = new Slider(0.0, 180.0, plant.dPitch);
+        xAngleDeltaSlider.setOrientation(Orientation.HORIZONTAL);
+        xAngleDeltaSlider.setPrefWidth(150);
+        xAngleDeltaSlider.setMaxWidth(150);
+        xAngleDeltaSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            xAngleDeltaSlider.setValue(newVal.intValue());
+            xAngleDeltaLabel.setText("X Angle Delta: " + xAngleDeltaSlider.getValue());
+            plant.dPitch = newVal.doubleValue();
+        });
+
+        Label yAngleDeltaLabel = new Label("Y Angle Delta: " + plant.dYaw);
+        Slider yAngleDeltaSlider = new Slider(0.0, 180.0, plant.dYaw);
+        yAngleDeltaSlider.setOrientation(Orientation.HORIZONTAL);
+        yAngleDeltaSlider.setPrefWidth(150);
+        yAngleDeltaSlider.setMaxWidth(150);
+        yAngleDeltaSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            yAngleDeltaSlider.setValue(newVal.intValue());
+            yAngleDeltaLabel.setText("Y Angle Delta: " + yAngleDeltaSlider.getValue());
+            plant.dYaw = newVal.doubleValue();
+        });
+
+        Label zAngleDeltaLabel = new Label("Z Angle Delta: " + plant.dRoll);
+        Slider zAngleDeltaSlider = new Slider(0.0, 180.0, plant.dRoll);
+        zAngleDeltaSlider.setOrientation(Orientation.HORIZONTAL);
+        zAngleDeltaSlider.setPrefWidth(150);
+        zAngleDeltaSlider.setMaxWidth(150);
+        zAngleDeltaSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            zAngleDeltaSlider.setValue(newVal.intValue());
+            zAngleDeltaLabel.setText("Z Angle Delta: " + zAngleDeltaSlider.getValue());
+            plant.dRoll = newVal.doubleValue();
+        });
+
+        HBox seedStuff = new HBox();
+        seedStuff.setAlignment(Pos.CENTER);
+        seedStuff.setSpacing(10);
+        TextField seedField = new TextField("");
+        seedField.setPrefWidth(70);
+        seedField.setMaxWidth(70);
+        Button seedButton = new Button("Set Seed");
+        seedButton.setPrefWidth(70);
+        seedButton.setMaxWidth(70);
+        seedButton.setOnAction(e -> {
+            plant.seed = new StringBuilder(seedField.getText());
+        });
+        seedStuff.getChildren().addAll(seedField, seedButton);
+
+
+        Button ruleSelection = new Button("Rules");
+        ruleSelection.setPrefWidth(150);
+        ruleSelection.setOnAction(e -> {
+            RuleSelector.display(plant);
+        });
+
+        Button flowerLeafSelection = new Button("Flower/Leaf Attributes");
+        flowerLeafSelection.setPrefWidth(150);
+        flowerLeafSelection.setOnAction(e -> {
+            // ...
+        });
+
+        Button colorSelection = new Button("Color");
+        colorSelection.setPrefWidth(150);
+        colorSelection.setOnAction(e -> {
+            this.plant.color = ColorSelector.display();
+        });
+
+        Button render = new Button("Render");
         render.setPrefWidth(150);
         render.setOnAction(e -> {
             redraw();
         });
-
         // [...]
 
         tools.getChildren().addAll(branchingLabel, branchingSlider,
                 radiusLabel, radiusSlider,
+                stepLabel, stepSlider,
+                thinningLabel, thinningSlider,
+                xAngleDeltaLabel, xAngleDeltaSlider,
+                yAngleDeltaLabel, yAngleDeltaSlider,
+                zAngleDeltaLabel, zAngleDeltaSlider,
+                seedStuff,
+                flowerLeafSelection,
+                ruleSelection,
                 colorSelection, render);
     }
 

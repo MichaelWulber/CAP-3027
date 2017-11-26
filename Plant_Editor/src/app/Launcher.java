@@ -1,6 +1,8 @@
 package app;
 
 import javafx.application.Application;
+import javafx.geometry.Rectangle2D;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class Launcher extends Application {
@@ -11,8 +13,10 @@ public class Launcher extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         stage.setTitle("test");
-        WelcomeScene welcomeScene = new WelcomeScene(800, 400, stage);
+        WelcomeScene welcomeScene = new WelcomeScene(WelcomeScene.WELCOME_SCENE_WIDTH,WelcomeScene.WELCOME_SCENE_HEIGHT, stage);
+        stage.setResizable(false);
         stage.setScene(welcomeScene);
+
         stage.show();
     }
 }

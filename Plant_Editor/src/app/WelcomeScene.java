@@ -1,16 +1,22 @@
 package app;
 
+import LSystem.LSystemFileParser;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.util.Random;
 
 public class WelcomeScene extends Scene
 {
+    final public static int WELCOME_SCENE_WIDTH = 800;
+    final public static int WELCOME_SCENE_HEIGHT = 600;
+
     private Stage primaryStage;
     private int width;
     private int height;
@@ -40,10 +46,24 @@ public class WelcomeScene extends Scene
         // --- file menu ---
         Menu fileMenu = new Menu("file");
 
+        // file chooser
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("lsys files","*.lsys"));
+
         // --- new plant ---
-        MenuItem new_plant = new MenuItem("new plant");
-        new_plant.setOnAction(e -> {
-            primaryStage.setScene(new EditorScene(800, 400, primaryStage));
+        MenuItem newPlant = new MenuItem("new plant");
+        newPlant.setOnAction(e -> {
+
+            primaryStage.setScene(new EditorScene(EditorScene.EDITOR_SCENE_WIDTH, EditorScene.EDITOR_SCENE_WIDTH, primaryStage));
+        });
+
+        MenuItem loadPlant = new MenuItem("load plant");
+        loadPlant.setOnAction(e -> {
+            try {
+                primaryStage.setScene(new EditorScene(EditorScene.EDITOR_SCENE_WIDTH, EditorScene.EDITOR_SCENE_WIDTH, LSystemFileParser.parseLSYS(fileChooser.showOpenDialog(primaryStage)), primaryStage));
+            } catch (Exception exception){
+                System.out.println(exception);
+            }
         });
 
         // --- exit ---
@@ -54,7 +74,7 @@ public class WelcomeScene extends Scene
         // [...]
 
         // combine menu components
-        fileMenu.getItems().addAll(new_plant, exit);
+        fileMenu.getItems().addAll(newPlant, loadPlant, exit);
         menuBar.getMenus().addAll(fileMenu);
         BorderPane borderPane = (BorderPane) this.getRoot();
         borderPane.setTop(menuBar);

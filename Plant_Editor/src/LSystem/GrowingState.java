@@ -12,7 +12,7 @@ public class GrowingState {
     public double stepSize;
     public double radius;
 
-    public GrowingState(double stepSize){
+    public GrowingState(double radius, double stepSize){
         this.posX = 0;
         this.posY = 0;
         this.posZ = 0;
@@ -20,7 +20,7 @@ public class GrowingState {
         this.yaw = 0;
         this.roll = 0;
         this.stepSize = stepSize;
-        this.radius = 5;
+        this.radius = radius;
     }
 
     public GrowingState(GrowingState gs){
@@ -31,5 +31,6 @@ public class GrowingState {
         this.yaw = gs.yaw;
         this.roll = gs.roll;
         this.stepSize = gs.stepSize;
+        this.radius = gs.radius;
     }
 }

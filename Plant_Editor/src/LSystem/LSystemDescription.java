@@ -12,6 +12,7 @@ public class LSystemDescription {
     public double dYaw;
     public double dRoll;
     public double radius;
+    public double shrinkRate;
     public int resolution;
     public StringBuilder seed;
     public HashMap<Character, StringBuilder> rules;
@@ -25,10 +26,11 @@ public class LSystemDescription {
         this.dYaw = 0;
         this.dRoll = 0;
         this.radius = 0;
+        this.shrinkRate = 0.0;
         this.resolution = 0;
         this.seed = new StringBuilder("");
         this.rules = new HashMap<>();
-        this.keys = new LinkedList<Character>();
+        this.color = new Color(0,0,0, 1);
     }
 
     public LSystemDescription(int branchingDegree, double scale, double dPitch, double dYaw, double dRoll, StringBuilder seed, HashMap<Character, StringBuilder> rules){
@@ -42,7 +44,6 @@ public class LSystemDescription {
     }
 
     public void addRule(char key, StringBuilder rule){
-        keys.add(key);
         rules.put(key, rule);
     }
 }
