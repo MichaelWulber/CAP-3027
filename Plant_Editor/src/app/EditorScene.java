@@ -221,6 +221,17 @@ public class EditorScene extends Scene {
             plant.shrinkRate = newVal.doubleValue();
         });
 
+        Label segmentsLabel = new Label("Segments Per Branch: " + plant.resolution);
+        Slider segmentsSlider = new Slider(0.0, 10.0, plant.resolution);
+        segmentsSlider.setOrientation(Orientation.HORIZONTAL);
+        segmentsSlider.setPrefWidth(150);
+        segmentsSlider.setMaxWidth(150);
+        segmentsSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            segmentsSlider.setValue(newVal.intValue());
+            segmentsLabel.setText( "Segments Per Branch: " + segmentsSlider.getValue() );
+            plant.resolution = newVal.intValue();
+        });
+
         Label stepLabel = new Label("Scale: " + plant.scale);
         Slider stepSlider = new Slider(1, 100, plant.scale);
         stepSlider.setOrientation(Orientation.HORIZONTAL);
@@ -307,6 +318,7 @@ public class EditorScene extends Scene {
 
         tools.getChildren().addAll(branchingLabel, branchingSlider,
                 radiusLabel, radiusSlider,
+                segmentsLabel, segmentsSlider,
                 stepLabel, stepSlider,
                 thinningLabel, thinningSlider,
                 xAngleDeltaLabel, xAngleDeltaSlider,

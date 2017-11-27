@@ -118,9 +118,9 @@ public class LSystemBuilder {
 //        System.out.println("vec: " + vec[0] + ", " + vec[1] + ", " + vec[2]);
 //        System.out.println("pitch: " + gs.pitch + " yaw: " + gs.yaw + " roll: " + gs.roll);
 //        System.out.println("Line at: (" + (gs.posX) + ", " + (gs.posY) + ", " + (gs.posZ) + ") , (" + (gs.posX + vec[0]) + ", " + (gs.posY + vec[1]) + ", " + (gs.posZ + vec[2]) + ")");
-        double dx = vec[0]/(lsd.resolution - 1);
-        double dy = vec[1]/(lsd.resolution - 1);
-        double dz = vec[2]/(lsd.resolution - 1);
+        double dx = vec[0]/(lsd.resolution);
+        double dy = vec[1]/(lsd.resolution);
+        double dz = vec[2]/(lsd.resolution);
 
         double xx = gs.posX;
         double yy = gs.posY;
@@ -128,7 +128,7 @@ public class LSystemBuilder {
 
         double rr = gs.radius;
         gs.radius *= 1.0;
-        double dr = (rr - rr * 1.0)/(lsd.resolution - 1);
+        double dr = (rr - rr * 1.0)/(lsd.resolution);
 
         double[][] skeleton = new double[lsd.resolution][3];
         double[][] angles = new double[lsd.resolution][2];

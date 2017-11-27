@@ -95,7 +95,6 @@ public class Meshy {
         int b = 0;
         int c = 0;
 
-        System.out.println("face values");
         for (int i = 0; i < skeleton.length - 1; ++i){
             base1 = i * resolution;
             base2 = (i + 1) * resolution;
