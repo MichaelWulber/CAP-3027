@@ -57,6 +57,7 @@ public class WelcomeScene extends Scene
             primaryStage.setScene(new EditorScene(EditorScene.EDITOR_SCENE_WIDTH, EditorScene.EDITOR_SCENE_WIDTH, primaryStage));
         });
 
+        // --- load plant ---
         MenuItem loadPlant = new MenuItem("load plant");
         loadPlant.setOnAction(e -> {
             try {

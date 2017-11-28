@@ -22,9 +22,9 @@ public class ColorSelector {
 
     public static Color color;
 
-    private static float r = 0;
-    private static float g = 0;
-    private static float b = 0;
+    public static float r = 0;
+    public static float g = 0;
+    public static float b = 0;
 
     public static Color display(){
         Stage colorSelector = new Stage();

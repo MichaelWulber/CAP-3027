@@ -2,6 +2,7 @@ package app;
 
 import LSystem.LSystemBuilder;
 import LSystem.LSystemDescription;
+import LSystem.LSystemFileParser;
 import Plant.PlantComponent;
 import Plant.Plant_Iterators.Iter;
 import javafx.beans.value.ChangeListener;
@@ -20,10 +21,12 @@ import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.Shape3D;
 import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import javax.swing.*;
 import javax.xml.crypto.dsig.Transform;
+import java.io.File;
 
 public class EditorScene extends Scene {
     final public static int EDITOR_SCENE_WIDTH = 800;
@@ -78,6 +81,10 @@ public class EditorScene extends Scene {
     private void initMenuBar(){
         MenuBar menuBar = new MenuBar();
 
+        // file chooser
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("lsys files","*.lsys"));
+
         // --- file menu ---
         Menu fileMenu = new Menu("file");
 
@@ -85,6 +92,44 @@ public class EditorScene extends Scene {
         MenuItem new_plant = new MenuItem("new plant");
         new_plant.setOnAction(e -> {
             primaryStage.setScene(new EditorScene(EDITOR_SCENE_WIDTH, EDITOR_SCENE_HEIGHT, primaryStage));
+        });
+
+        // --- load plant ---
+        MenuItem loadPlant = new MenuItem("load plant");
+        loadPlant.setOnAction(e -> {
+            try {
+                primaryStage.setScene(new EditorScene(EditorScene.EDITOR_SCENE_WIDTH, EditorScene.EDITOR_SCENE_WIDTH, LSystemFileParser.parseLSYS(fileChooser.showOpenDialog(primaryStage)), primaryStage));
+            } catch (Exception exception){
+                System.out.println(exception);
+            }
+        });
+
+        // --- save plant ---
+        MenuItem savePlant = new MenuItem("save plant");
+        loadPlant.setOnAction(e -> {
+            try {
+                File saveFile = fileChooser.showSaveDialog(primaryStage);
+                if (saveFile != null){
+                    String contents = plant.branchingDegree + "\n" +
+                            plant.scale + "\n" +
+                            plant.dPitch + "\n" +
+                            plant.dYaw + "\n" +
+                            plant.dRoll + "\n" +
+                            plant.radius + "\n" +
+                            plant.shrinkRate + "\n" +
+                            ColorSelector.r + "\n" +
+                            ColorSelector.g + "\n" +
+                            ColorSelector.b + "\n" +
+                            plant.seed + "\n";
+                    for (Character key : plant.rules.keySet()){
+                        contents += key.toString() + "=" + plant.rules.get(key).toString();
+                    }
+
+                    // [add contents to selected file]
+                }
+            } catch (Exception exception){
+                System.out.println(exception);
+            }
         });
 
         // --- exit ---
@@ -95,7 +140,7 @@ public class EditorScene extends Scene {
         // [...]
 
         // combine menu components
-        fileMenu.getItems().addAll(new_plant, exit);
+        fileMenu.getItems().addAll(new_plant, loadPlant, exit);
         menuBar.getMenus().addAll(fileMenu);
         BorderPane borderPane = (BorderPane) this.getRoot();
         borderPane.setTop(menuBar);

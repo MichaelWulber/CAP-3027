@@ -130,11 +130,11 @@ public class LSystemBuilder {
         gs.radius *= 1.0;
         double dr = (rr - rr * 1.0)/(lsd.resolution);
 
-        double[][] skeleton = new double[lsd.resolution][3];
-        double[][] angles = new double[lsd.resolution][2];
-        double[] radii = new double[lsd.resolution];
+        double[][] skeleton = new double[lsd.resolution + 1][3];
+        double[][] angles = new double[lsd.resolution + 1][2];
+        double[] radii = new double[lsd.resolution + 1];
 
-        for (int i = 0; i < lsd.resolution; i++){
+        for (int i = 0; i <= lsd.resolution; i++){
             skeleton[i][0] = xx;
             skeleton[i][1] = yy;
             skeleton[i][2] = zz;
