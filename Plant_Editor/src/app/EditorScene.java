@@ -27,6 +27,7 @@ import javafx.stage.Stage;
 import javax.swing.*;
 import javax.xml.crypto.dsig.Transform;
 import java.io.File;
+import java.io.FileWriter;
 
 public class EditorScene extends Scene {
     final public static int EDITOR_SCENE_WIDTH = 800;
@@ -43,7 +44,6 @@ public class EditorScene extends Scene {
 
     private int width;
     private int height;
-    private Color color;
 
     private LSystemDescription plant;
     private LSystemBuilder builder;
@@ -53,7 +53,6 @@ public class EditorScene extends Scene {
         this.primaryStage = primaryStage;
         this.width = width;
         this.height = height;
-        this.color = Color.LIGHTGREEN;
 
         this.plant = lsd;
         this.builder = new LSystemBuilder(plant);
@@ -68,7 +67,6 @@ public class EditorScene extends Scene {
         this.primaryStage = primaryStage;
         this.width = width;
         this.height = height;
-        this.color = Color.LIGHTGREEN;
 
         this.plant = new LSystemDescription();
         this.builder = new LSystemBuilder(plant);
@@ -86,27 +84,28 @@ public class EditorScene extends Scene {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("lsys files","*.lsys"));
 
         // --- file menu ---
-        Menu fileMenu = new Menu("file");
+        Menu fileMenu = new Menu("File");
 
         // --- new plant ---
-        MenuItem new_plant = new MenuItem("new plant");
+        MenuItem new_plant = new MenuItem("New Plant");
         new_plant.setOnAction(e -> {
             primaryStage.setScene(new EditorScene(EDITOR_SCENE_WIDTH, EDITOR_SCENE_HEIGHT, primaryStage));
         });
 
         // --- load plant ---
-        MenuItem loadPlant = new MenuItem("load plant");
+        MenuItem loadPlant = new MenuItem("Load Plant");
         loadPlant.setOnAction(e -> {
             try {
-                primaryStage.setScene(new EditorScene(EditorScene.EDITOR_SCENE_WIDTH, EditorScene.EDITOR_SCENE_WIDTH, LSystemFileParser.parseLSYS(fileChooser.showOpenDialog(primaryStage)), primaryStage));
+                primaryStage.setScene(new EditorScene(EditorScene.EDITOR_SCENE_WIDTH, EditorScene.EDITOR_SCENE_HEIGHT, LSystemFileParser.parseLSYS(fileChooser.showOpenDialog(primaryStage)), primaryStage));
+                System.out.println("...");
             } catch (Exception exception){
                 System.out.println(exception);
             }
         });
 
         // --- save plant ---
-        MenuItem savePlant = new MenuItem("save plant");
-        loadPlant.setOnAction(e -> {
+        MenuItem savePlant = new MenuItem("Save Plant");
+        savePlant.setOnAction(e -> {
             try {
                 File saveFile = fileChooser.showSaveDialog(primaryStage);
                 if (saveFile != null){
@@ -117,16 +116,29 @@ public class EditorScene extends Scene {
                             plant.dRoll + "\n" +
                             plant.radius + "\n" +
                             plant.shrinkRate + "\n" +
+                            plant.resolution + "\n" +
                             ColorSelector.r + "\n" +
                             ColorSelector.g + "\n" +
                             ColorSelector.b + "\n" +
-                            plant.seed + "\n";
+                            plant.seed;
                     for (Character key : plant.rules.keySet()){
-                        contents += key.toString() + "=" + plant.rules.get(key).toString();
+                        contents += "\n" + key.toString() + "=" + plant.rules.get(key).toString();
                     }
-
-                    // [add contents to selected file]
+                    // file writer
+                    FileWriter fileWriter = new FileWriter(saveFile);
+                    fileWriter.write(contents);
+                    fileWriter.close();
                 }
+            } catch (Exception exception){
+                System.out.println(exception);
+            }
+        });
+
+        // --- generate forest ---
+        MenuItem generateForest = new MenuItem("Generate Forest");
+        generateForest.setOnAction(e -> {
+            try {
+                primaryStage.setScene(new GenerateForestScene(GenerateForestScene.DEFAULT_WIDTH, GenerateForestScene.DEFAULT_HEIGHT, primaryStage));
             } catch (Exception exception){
                 System.out.println(exception);
             }
@@ -140,7 +152,7 @@ public class EditorScene extends Scene {
         // [...]
 
         // combine menu components
-        fileMenu.getItems().addAll(new_plant, loadPlant, exit);
+        fileMenu.getItems().addAll(new_plant, loadPlant, savePlant, generateForest, exit);
         menuBar.getMenus().addAll(fileMenu);
         BorderPane borderPane = (BorderPane) this.getRoot();
         borderPane.setTop(menuBar);
@@ -170,8 +182,6 @@ public class EditorScene extends Scene {
         camera.setNearClip(0.001);
         camera.setFarClip(25000);
 
-//        Rotate rx = new Rotate(0, Rotate.X_AXIS);
-//        Rotate ry = new Rotate(0, Rotate.Y_AXIS);
         Rotate rotateX = new Rotate(0, -camera.getTranslateX(), -camera.getTranslateY(), -camera.getTranslateZ(), Rotate.X_AXIS);
         Rotate rotateY = new Rotate(0, -camera.getTranslateX(), -camera.getTranslateY(), -camera.getTranslateZ(), Rotate.Y_AXIS);
 
@@ -252,10 +262,10 @@ public class EditorScene extends Scene {
         radiusSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             radiusSlider.setValue(newVal.intValue());
             radiusLabel.setText("Initial Branch Radius: " + radiusSlider.getValue());
-            plant.radius = newVal.doubleValue();
+            plant.radius = newVal.intValue();
         });
 
-        Label thinningLabel = new Label("Branch Thinning Rate: " + plant.shrinkRate);
+        Label thinningLabel = new Label("Branch Thinning Rate: " + String.format("%.2f", plant.shrinkRate));
         Slider thinningSlider = new Slider(0.0, 1.0, plant.shrinkRate);
         thinningSlider.setOrientation(Orientation.HORIZONTAL);
         thinningSlider.setPrefWidth(150);
@@ -263,11 +273,11 @@ public class EditorScene extends Scene {
         thinningSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             thinningSlider.setValue(newVal.floatValue());
             thinningLabel.setText( "Branch Thinning Rate: " + String.format("%.2f", thinningSlider.getValue()) );
-            plant.shrinkRate = newVal.doubleValue();
+            plant.shrinkRate = newVal.floatValue();
         });
 
         Label segmentsLabel = new Label("Segments Per Branch: " + plant.resolution);
-        Slider segmentsSlider = new Slider(0.0, 10.0, plant.resolution);
+        Slider segmentsSlider = new Slider(1.0, 10.0, plant.resolution);
         segmentsSlider.setOrientation(Orientation.HORIZONTAL);
         segmentsSlider.setPrefWidth(150);
         segmentsSlider.setMaxWidth(150);
@@ -278,14 +288,14 @@ public class EditorScene extends Scene {
         });
 
         Label stepLabel = new Label("Scale: " + plant.scale);
-        Slider stepSlider = new Slider(1, 100, plant.scale);
+        Slider stepSlider = new Slider(1.0, 1000, plant.scale);
         stepSlider.setOrientation(Orientation.HORIZONTAL);
         stepSlider.setPrefWidth(150);
         stepSlider.setMaxWidth(150);
         stepSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             stepSlider.setValue(newVal.intValue());
             stepLabel.setText("Scale: " + stepSlider.getValue());
-            plant.scale = newVal.doubleValue();
+            plant.scale = newVal.intValue();
         });
 
         Label xAngleDeltaLabel = new Label("X Angle Delta: " + plant.dPitch);

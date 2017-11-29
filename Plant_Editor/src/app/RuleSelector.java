@@ -23,7 +23,7 @@ public class RuleSelector {
         BorderPane borderPane = new BorderPane();
         Scene scene = new Scene(borderPane, 500, 500);
         ruleSelector.initModality(Modality.APPLICATION_MODAL);
-        ruleSelector.setTitle("rule selection");
+        ruleSelector.setTitle("Rule Selection");
         ruleSelector.setResizable(false);
 
         // list view of rules

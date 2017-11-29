@@ -100,7 +100,7 @@ public class LSystemFileParser {
 
         scanner.nextLine();
         while(scanner.hasNextLine()){
-            line = scanner.nextLine();
+            line = removeWhiteSpace(scanner.nextLine());
             System.out.println("line: " + "\"" + line + "\"");
             String[] rule = line.split("=");
             lsd.addRule(rule[0].charAt(0), new StringBuilder(rule[1]));

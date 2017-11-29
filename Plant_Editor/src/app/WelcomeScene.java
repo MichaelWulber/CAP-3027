@@ -10,6 +10,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.util.Random;
 
 public class WelcomeScene extends Scene
@@ -44,24 +45,37 @@ public class WelcomeScene extends Scene
         MenuBar menuBar = new MenuBar();
 
         // --- file menu ---
-        Menu fileMenu = new Menu("file");
+        Menu fileMenu = new Menu("File");
 
         // file chooser
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("lsys files","*.lsys"));
 
         // --- new plant ---
-        MenuItem newPlant = new MenuItem("new plant");
+        MenuItem newPlant = new MenuItem("New Plant");
         newPlant.setOnAction(e -> {
 
-            primaryStage.setScene(new EditorScene(EditorScene.EDITOR_SCENE_WIDTH, EditorScene.EDITOR_SCENE_WIDTH, primaryStage));
+            primaryStage.setScene(new EditorScene(EditorScene.EDITOR_SCENE_WIDTH, EditorScene.EDITOR_SCENE_HEIGHT, primaryStage));
         });
 
         // --- load plant ---
-        MenuItem loadPlant = new MenuItem("load plant");
+        MenuItem loadPlant = new MenuItem("Load Plant");
         loadPlant.setOnAction(e -> {
             try {
-                primaryStage.setScene(new EditorScene(EditorScene.EDITOR_SCENE_WIDTH, EditorScene.EDITOR_SCENE_WIDTH, LSystemFileParser.parseLSYS(fileChooser.showOpenDialog(primaryStage)), primaryStage));
+                File file = fileChooser.showOpenDialog(primaryStage);
+                if (file != null) {
+                    primaryStage.setScene(new EditorScene(EditorScene.EDITOR_SCENE_WIDTH, EditorScene.EDITOR_SCENE_HEIGHT, LSystemFileParser.parseLSYS(file), primaryStage));
+                }
+            } catch (Exception exception){
+                System.out.println(exception);
+            }
+        });
+
+        // --- generate forest ---
+        MenuItem generateForest = new MenuItem("Generate Forest");
+        generateForest.setOnAction(e -> {
+            try {
+                primaryStage.setScene(new GenerateForestScene(GenerateForestScene.DEFAULT_WIDTH, GenerateForestScene.DEFAULT_HEIGHT, primaryStage));
             } catch (Exception exception){
                 System.out.println(exception);
             }
@@ -75,7 +89,7 @@ public class WelcomeScene extends Scene
         // [...]
 
         // combine menu components
-        fileMenu.getItems().addAll(newPlant, loadPlant, exit);
+        fileMenu.getItems().addAll(newPlant, loadPlant, generateForest, exit);
         menuBar.getMenus().addAll(fileMenu);
         BorderPane borderPane = (BorderPane) this.getRoot();
         borderPane.setTop(menuBar);

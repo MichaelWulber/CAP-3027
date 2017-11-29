@@ -19,6 +19,9 @@ public class LSystemBuilder {
     public LSystemBuilder(LSystemDescription lsd){
         this.lsd = lsd;
     }
+    public LSystemBuilder(){
+        lsd = new LSystemDescription();
+    }
 
     // string generation functions
     private StringBuilder stringGenerator(){
@@ -83,6 +86,10 @@ public class LSystemBuilder {
                 current.addChild(branch);
                 current = branch;
                 grow(state);
+            } else if (c == 'L'){
+                current.addShape(genLeaf(state));
+            } else if (c == 'W'){
+                current.addShape(genFlower(state));
             } else if (c == '+'){
                 state.pitch += lsd.dPitch;
             } else if (c == '-'){
@@ -97,10 +104,11 @@ public class LSystemBuilder {
                 state.roll -= lsd.dRoll;
             } else if (c == '['){
                 states.push(new GrowingState(state));
-                state.radius *= lsd.shrinkRate;
+                if (state.radius * lsd.shrinkRate > 1) {
+                    state.radius *= lsd.shrinkRate;
+                }
                 plantStack.push(current);
             } else if (c == ']'){
-                current.addShape(genFlower(state));
                 state = states.pop();
                 current = plantStack.pop();
             }
@@ -115,9 +123,6 @@ public class LSystemBuilder {
 
         // create transforms
         double[] vec = getVec(gs);
-//        System.out.println("vec: " + vec[0] + ", " + vec[1] + ", " + vec[2]);
-//        System.out.println("pitch: " + gs.pitch + " yaw: " + gs.yaw + " roll: " + gs.roll);
-//        System.out.println("Line at: (" + (gs.posX) + ", " + (gs.posY) + ", " + (gs.posZ) + ") , (" + (gs.posX + vec[0]) + ", " + (gs.posY + vec[1]) + ", " + (gs.posZ + vec[2]) + ")");
         double dx = vec[0]/(lsd.resolution);
         double dy = vec[1]/(lsd.resolution);
         double dz = vec[2]/(lsd.resolution);
@@ -195,6 +200,19 @@ public class LSystemBuilder {
     }
 
     private Shape3D genFlower(GrowingState state){
+        PhongMaterial greenMaterial = new PhongMaterial();
+        greenMaterial.setSpecularColor(Color.GREEN);
+        greenMaterial.setDiffuseColor(Color.LIGHTGREEN);
+        Sphere flower = new Sphere(10, 5);
+        flower.setMaterial(greenMaterial);
+        flower.setDrawMode(DrawMode.FILL);
+        flower.setTranslateX(state.posX);
+        flower.setTranslateY(state.posY);
+        flower.setTranslateZ(state.posZ);
+        return flower;
+    }
+
+    private Shape3D genLeaf(GrowingState state){
         PhongMaterial greenMaterial = new PhongMaterial();
         greenMaterial.setSpecularColor(Color.GREEN);
         greenMaterial.setDiffuseColor(Color.LIGHTGREEN);
