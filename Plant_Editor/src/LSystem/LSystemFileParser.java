@@ -16,6 +16,7 @@ public class LSystemFileParser {
         float r;
         float g;
         float b;
+        int numRules;
 
         // branching degree
         if (scanner.hasNextInt()) {
@@ -92,18 +93,32 @@ public class LSystemFileParser {
             throw new Exception("corrupted file 11");
         }
 
+        if (scanner.hasNextInt()){
+            numRules = scanner.nextInt();
+        } else {
+            throw new Exception("corrupted file 12");
+        }
+
         lsd.color = new Color(r, g, b, 1);
 
         if (scanner.hasNext()){
             lsd.seed = new StringBuilder(scanner.next());
         }
 
+
         scanner.nextLine();
-        while(scanner.hasNextLine()){
+        for (int j = 0; j < numRules; j++){
             line = removeWhiteSpace(scanner.nextLine());
-            System.out.println("line: " + "\"" + line + "\"");
+//            System.out.println("line: " + "\"" + line + "\"");
             String[] rule = line.split("=");
             lsd.addRule(rule[0].charAt(0), new StringBuilder(rule[1]));
+        }
+
+        for (int j = 0; j < numRules; j++){
+            line = removeWhiteSpace(scanner.nextLine());
+//            System.out.println("line: " + "\"" + line + "\"");
+            String[] prob = line.split("=");
+            lsd.probs.put(prob[0].charAt(0), Double.valueOf(prob[1]));
         }
 
         return lsd;

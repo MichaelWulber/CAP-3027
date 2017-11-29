@@ -1,6 +1,8 @@
 package app;
 
 import LSystem.LSystemFileParser;
+import app.Editor.EditorScene;
+import app.ForestGeneration.GenerateForestScene;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -10,7 +12,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.util.Random;
 
 public class WelcomeScene extends Scene

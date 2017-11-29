@@ -12,6 +12,7 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 
 import java.util.LinkedList;
+import java.util.Random;
 
 public class LSystemBuilder {
     private LSystemDescription lsd;
@@ -37,7 +38,8 @@ public class LSystemBuilder {
     }
 
     private int replace(StringBuilder output, int index){
-        if ( lsd.rules.containsKey(output.charAt(index)) ){
+        Random rng = new Random();
+        if ( lsd.rules.containsKey(output.charAt(index)) && lsd.probs.get(output.charAt(index)) > rng.nextDouble() ){
             StringBuilder replacement = lsd.rules.get(output.charAt(index));
             output.insert(index, replacement);
             output.deleteCharAt(index + replacement.length());
