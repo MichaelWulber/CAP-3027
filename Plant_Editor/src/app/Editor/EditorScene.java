@@ -3,6 +3,9 @@ package app.Editor;
 import LSystem.LSystemBuilder;
 import LSystem.LSystemDescription;
 import LSystem.LSystemFileParser;
+import Mesh.LeafDescription;
+import Mesh.LeafMesh;
+import Plant.Leaf;
 import Plant.PlantComponent;
 import Plant.Plant_Iterators.Iter;
 import app.ForestGeneration.GenerateForestScene;
@@ -46,6 +49,10 @@ public class EditorScene extends Scene {
         this.plant = lsd;
         this.builder = new LSystemBuilder(plant);
 
+        ColorSelector.r = (float) plant.color.getRed();
+        ColorSelector.g = (float) plant.color.getGreen();
+        ColorSelector.b = (float) plant.color.getBlue();
+
         initMenuBar();
         initDisplay();
         initTools();
@@ -59,6 +66,10 @@ public class EditorScene extends Scene {
 
         this.plant = new LSystemDescription();
         this.builder = new LSystemBuilder(plant);
+
+        ColorSelector.r = (int)(plant.color.getRed() * 255);
+        ColorSelector.g = (int)(plant.color.getGreen() * 255);
+        ColorSelector.b = (int)(plant.color.getBlue() * 255);
 
         initMenuBar();
         initDisplay();
@@ -335,10 +346,10 @@ public class EditorScene extends Scene {
             RuleSelector.display(plant);
         });
 
-        Button flowerLeafSelection = new Button("Flower/Leaf Attributes");
-        flowerLeafSelection.setPrefWidth(150);
-        flowerLeafSelection.setOnAction(e -> {
-            // ...
+        Button LeafSelection = new Button("Leaf Attributes");
+        LeafSelection.setPrefWidth(150);
+        LeafSelection.setOnAction(e -> {
+            plant.ld =  LeafSelector.display();
         });
 
         Button colorSelection = new Button("Color");
@@ -362,14 +373,9 @@ public class EditorScene extends Scene {
                 yAngleDeltaLabel, yAngleDeltaSlider,
                 zAngleDeltaLabel, zAngleDeltaSlider,
                 seedStuff,
-                flowerLeafSelection,
+                LeafSelection,
                 ruleSelection,
                 colorSelection, render);
-    }
-
-    private void getSelectedColor(){
-        ColorSelector.display();
-        this.plant.color = ColorSelector.color;
     }
 
     private void redraw(){

@@ -1,8 +1,9 @@
 package app.Editor;
 
+import Mesh.LeafDescription;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,28 +16,32 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import jdk.nashorn.internal.runtime.regexp.joni.constants.StackPopLevel;
 
+import javax.security.auth.callback.LanguageCallback;
 
-public class ColorSelector {
-
-    public static Color color;
+public class LeafSelector {
 
     public static float r = 0;
     public static float g = 0;
     public static float b = 0;
 
-    public static Color display(){
+    public static double r1 = 1;
+    public static double r2 = 1;
+    public static double tilt = 0;
+
+    public static LeafDescription display(){
         Stage colorSelector = new Stage();
         BorderPane borderPane = new BorderPane();
-        Scene scene = new Scene(borderPane, 450, 175);
+        Scene scene = new Scene(borderPane, 450, 450);
         colorSelector.initModality(Modality.APPLICATION_MODAL);
         colorSelector.setTitle("color selection");
 
         // preview color
         StackPane pane = new StackPane();
-        pane.setPrefWidth(150);
-        pane.setAlignment(Pos.CENTER);
+        pane.setMinWidth(150);
+        pane.setMinHeight(150);
+        pane.setPadding(new Insets(40.0));
+        pane.setAlignment(Pos.TOP_CENTER);
         Rectangle preview = new Rectangle(100, 100, new Color(r, g, b, 1));
         pane.getChildren().add(preview);
         borderPane.setRight(pane);
@@ -74,10 +79,46 @@ public class ColorSelector {
             preview.setFill(new Color(r, g, b, 1));
         });
 
+        Label r1Label = new Label("Radius 1: " +  String.format("%.2f", r1));
+        // r1 slider
+        Slider radius1 = new Slider(0.0, 100.0, r1);
+        radius1.setOrientation(Orientation.HORIZONTAL);
+        radius1.setPrefWidth(200);
+        radius1.setMaxWidth(200);
+        radius1.valueProperty().addListener((obs, oldVal, newVal) -> {
+            radius1.setValue(newVal.doubleValue());
+            setR1(newVal.doubleValue());
+            r1Label.setText("Radius 1: " +  String.format("%.2f", r1));
+        });
+
+        // r2 slider
+        Label r2Label = new Label("Radius 2: " +  String.format("%.2f", r2));
+        Slider radius2 = new Slider(1.0, 100.0, r2);
+        radius2.setOrientation(Orientation.HORIZONTAL);
+        radius2.setPrefWidth(200);
+        radius2.setMaxWidth(200);
+        radius2.valueProperty().addListener((obs, oldVal, newVal) -> {
+            radius2.setValue(newVal.doubleValue());
+            setR2(newVal.doubleValue());
+            r2Label.setText("Radius 2: " +  String.format("%.2f", r2));
+        });
+
+        // tilt slider
+        Label tiltLabel = new Label("Tilt: " +  String.format("%.2f", tilt));
+        Slider tiltSlider = new Slider(0.0, 180.0, b);
+        tiltSlider.setOrientation(Orientation.HORIZONTAL);
+        tiltSlider.setPrefWidth(200);
+        tiltSlider.setMaxWidth(200);
+        tiltSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            tiltSlider.setValue(newVal.doubleValue());
+            setTilt(newVal.doubleValue());
+            tiltLabel.setText("Tilt: " +  String.format("%.2f", tilt));
+        });
+
         VBox components = new VBox();
         components.setAlignment(Pos.CENTER);
-        components.setSpacing(30);
-        components.getChildren().addAll(red, green, blue);
+        components.setSpacing(20);
+        components.getChildren().addAll(red, green, blue, r1Label, radius1, r2Label, radius2, tiltLabel, tiltSlider);
         borderPane.setCenter(components);
 
         // buttons
@@ -100,7 +141,7 @@ public class ColorSelector {
         colorSelector.setScene(scene);
         colorSelector.showAndWait();
 
-        return new Color(r, g, b, 1);
+        return new LeafDescription(new Color(r, g, b, 1), r1, r2, tilt);
     }
 
     private static void setR(float val){
@@ -115,4 +156,15 @@ public class ColorSelector {
         b = val;
     }
 
+    private static void setR1(double val){
+        r1 = val;
+    }
+
+    private static void setR2(double val){
+        r2 = val;
+    }
+
+    private static void setTilt(double val){
+        tilt = val;
+    }
 }

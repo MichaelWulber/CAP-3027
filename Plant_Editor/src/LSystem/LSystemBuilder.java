@@ -1,6 +1,8 @@
 package LSystem;
 
 import Mesh.Meshy;
+import Mesh.LeafDescription;
+import Mesh.LeafMesh;
 import Plant.PlantBranch;
 import Plant.PlantComponent;
 import Plant.Root;
@@ -90,8 +92,6 @@ public class LSystemBuilder {
                 grow(state);
             } else if (c == 'L'){
                 current.addShape(genLeaf(state));
-            } else if (c == 'W'){
-                current.addShape(genFlower(state));
             } else if (c == '+'){
                 state.pitch += lsd.dPitch;
             } else if (c == '-'){
@@ -201,30 +201,17 @@ public class LSystemBuilder {
         return vec;
     }
 
-    private Shape3D genFlower(GrowingState state){
-        PhongMaterial greenMaterial = new PhongMaterial();
-        greenMaterial.setSpecularColor(Color.GREEN);
-        greenMaterial.setDiffuseColor(Color.LIGHTGREEN);
-        Sphere flower = new Sphere(10, 5);
-        flower.setMaterial(greenMaterial);
-        flower.setDrawMode(DrawMode.FILL);
-        flower.setTranslateX(state.posX);
-        flower.setTranslateY(state.posY);
-        flower.setTranslateZ(state.posZ);
-        return flower;
-    }
-
     private Shape3D genLeaf(GrowingState state){
-        PhongMaterial greenMaterial = new PhongMaterial();
-        greenMaterial.setSpecularColor(Color.GREEN);
-        greenMaterial.setDiffuseColor(Color.LIGHTGREEN);
-        Sphere flower = new Sphere(10, 5);
-        flower.setMaterial(greenMaterial);
-        flower.setDrawMode(DrawMode.FILL);
-        flower.setTranslateX(state.posX);
-        flower.setTranslateY(state.posY);
-        flower.setTranslateZ(state.posZ);
-        return flower;
+        LeafMesh lm = new LeafMesh(lsd.ld);
+        MeshView leaf = lm.getMeshView();
+
+        leaf.setTranslateX(state.posX);
+        leaf.setTranslateY(state.posY);
+        leaf.setTranslateZ(state.posZ);
+        Rotate ry = new Rotate(state.yaw, Rotate.Y_AXIS);
+        leaf.getTransforms().add(ry);
+
+        return leaf;
     }
 
     public void setLsd(LSystemDescription lsd){

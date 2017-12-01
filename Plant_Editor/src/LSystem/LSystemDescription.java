@@ -1,5 +1,6 @@
 package LSystem;
 
+import Mesh.LeafDescription;
 import javafx.scene.paint.Color;
 
 import java.util.HashMap;
@@ -19,6 +20,7 @@ public class LSystemDescription {
     public HashMap<Character, Double> probs;
     public LinkedList<Character> keys;
     public Color color;
+    public LeafDescription ld;
 
     public LSystemDescription(){
         this.branchingDegree = 0;
@@ -33,18 +35,8 @@ public class LSystemDescription {
         this.rules = new HashMap<>();
         this.probs = new HashMap<>();
         this.color = new Color(0,0,0, 1);
+        this.ld = new LeafDescription(Color.GREEN, 1, 1, 0);
     }
-
-//    public LSystemDescription(int branchingDegree, double scale, double dPitch, double dYaw, double dRoll, StringBuilder seed, HashMap<Character, StringBuilder> rules){
-//        this.branchingDegree = branchingDegree;
-//        this.scale = scale;
-//        this.dPitch = dPitch;
-//        this.dYaw = dYaw;
-//        this.dRoll = dRoll;
-//        this.seed = seed;
-//        this.rules = rules;
-//        this.probs = new HashMap<>();
-//    }
 
     public void addRule(char key, StringBuilder rule){
         rules.put(key, rule);
