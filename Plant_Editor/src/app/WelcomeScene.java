@@ -2,6 +2,7 @@ package app;
 
 import LSystem.LSystemFileParser;
 import app.Editor.EditorScene;
+import app.Editor.ErrorScene;
 import app.ForestGeneration.GenerateForestScene;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -68,7 +69,7 @@ public class WelcomeScene extends Scene
                     primaryStage.setScene(new EditorScene(EditorScene.EDITOR_SCENE_WIDTH, EditorScene.EDITOR_SCENE_HEIGHT, LSystemFileParser.parseLSYS(file), primaryStage));
                 }
             } catch (Exception exception){
-                System.out.println(exception);
+                ErrorScene.display(exception.toString());
             }
         });
 
@@ -78,12 +79,12 @@ public class WelcomeScene extends Scene
             try {
                 primaryStage.setScene(new GenerateForestScene(GenerateForestScene.DEFAULT_WIDTH, GenerateForestScene.DEFAULT_HEIGHT, primaryStage));
             } catch (Exception exception){
-                System.out.println(exception);
+                ErrorScene.display(exception.toString());
             }
         });
 
         // --- exit ---
-        MenuItem exit = new MenuItem("exit");
+        MenuItem exit = new MenuItem("Exit");
         exit.setOnAction(e -> System.exit(0));
 
         // other menu items
@@ -98,9 +99,14 @@ public class WelcomeScene extends Scene
 
     private void initHints(){
         this.hints = new String[]{
-                "hint 1",
-                "hint 2",
-                "hint 3"
+                "There are many types of instructions: (F, I, J, K, +, -, \\, /, &, ^, [, ], L)",
+                "(F, I, J, K) all cause a branch to be created at the current angle",
+                "(+, -) all rotate the current state by angle around the x-axis",
+                "(\\, /) all rotate the current state by angle around the y-axis",
+                "(&, ^) all rotate the current state by angle around the z-axis",
+                "([, ]) store and restore the state respectively",
+                "(L) causes a leaf to be drawn at the current position and state",
+                "All other characters such as X, Y, Z, N... serve as rewrite characters which you can use to store complex branching patterns"
         };
 
         // choose random first hint
@@ -114,9 +120,10 @@ public class WelcomeScene extends Scene
 
     private void initButtons(){
         HBox buttons = new HBox();
+        buttons.setPrefHeight(200);
         buttons.setPrefWidth(100);
         buttons.setSpacing(20);
-        buttons.setAlignment(Pos.BOTTOM_CENTER);
+        buttons.setAlignment(Pos.CENTER);
         buttons.getChildren().addAll(previuos, next);
 
         BorderPane borderPane = (BorderPane) this.getRoot();

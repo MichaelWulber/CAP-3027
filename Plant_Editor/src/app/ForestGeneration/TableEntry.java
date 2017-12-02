@@ -1,7 +1,5 @@
 package app.ForestGeneration;
 
-import LSystem.LSystemDescription;
-
 import java.io.File;
 
 public class TableEntry {

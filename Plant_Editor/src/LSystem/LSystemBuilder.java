@@ -1,17 +1,13 @@
 package LSystem;
 
-import Mesh.Meshy;
-import Mesh.LeafDescription;
 import Mesh.LeafMesh;
+import Mesh.Meshy2;
 import Plant.PlantBranch;
 import Plant.PlantComponent;
 import Plant.Root;
-import javafx.scene.Group;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.*;
+import javafx.scene.shape.MeshView;
+import javafx.scene.shape.Shape3D;
 import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Translate;
 
 import java.util.LinkedList;
 import java.util.Random;
@@ -129,36 +125,19 @@ public class LSystemBuilder {
         double dy = vec[1]/(lsd.resolution);
         double dz = vec[2]/(lsd.resolution);
 
-        double xx = gs.posX;
-        double yy = gs.posY;
-        double zz = gs.posZ;
-
-        double rr = gs.radius;
-        gs.radius *= 1.0;
-        double dr = (rr - rr * 1.0)/(lsd.resolution);
-
-        double[][] skeleton = new double[lsd.resolution + 1][3];
-        double[][] angles = new double[lsd.resolution + 1][2];
-        double[] radii = new double[lsd.resolution + 1];
-
-        for (int i = 0; i <= lsd.resolution; i++){
-            skeleton[i][0] = xx;
-            skeleton[i][1] = yy;
-            skeleton[i][2] = zz;
-
-            angles[i][0] = gs.pitch;
-            angles[i][1] = gs.roll;
-
-            radii[i] = rr;
-
-            rr -= dr;
-            xx += dx;
-            yy += dy;
-            zz += dz;
-        }
-
-        Meshy meshy = new Meshy(skeleton, angles, radii, 10, lsd.color);
+        Meshy2 meshy = new Meshy2((float) gs.stepSize, (float) gs.radius, 10, lsd.color);
         MeshView meshyView = meshy.getMeshView();
+
+        meshyView.setTranslateX(gs.posX);
+        meshyView.setTranslateY(gs.posY);
+        meshyView.setTranslateZ(gs.posZ);
+
+        Rotate rx = new Rotate(gs.pitch, Rotate.X_AXIS);
+        Rotate ry = new Rotate(gs.yaw, Rotate.Y_AXIS);
+        Rotate rz = new Rotate(gs.roll, Rotate.Z_AXIS);
+
+        meshyView.getTransforms().addAll(rz, ry, rx);
+
         branch.addShape(meshyView);
         return branch;
     }
@@ -181,22 +160,22 @@ public class LSystemBuilder {
         double zz = vec[2];
 
         // rotate around x-axis
-        vec[1] = yy*Math.cos(p) + zz*Math.sin(p);
-        vec[2] = -yy*Math.sin(p) + zz*Math.cos(p);
+        vec[1] = yy*Math.cos(p) - zz*Math.sin(p);
+        vec[2] = yy*Math.sin(p) + zz*Math.cos(p);
         xx = vec[0];
         yy = vec[1];
         zz = vec[2];
 
         // rotate around y-axis
-        vec[0] = xx*Math.cos(y) - zz*Math.sin(y);
-        vec[2] = xx*Math.sin(y) + zz*Math.cos(y);
+        vec[0] = xx*Math.cos(y) + zz*Math.sin(y);
+        vec[2] = -xx*Math.sin(y) + zz*Math.cos(y);
         xx = vec[0];
         yy = vec[1];
         zz = vec[2];
 
         // rotate around z-axis
-        vec[0] = xx*Math.cos(r) + yy*Math.sin(r);
-        vec[1] = -xx*Math.sin(r) + yy*Math.cos(r);
+        vec[0] = xx*Math.cos(r) - yy*Math.sin(r);
+        vec[1] = xx*Math.sin(r) + yy*Math.cos(r);
 
         return vec;
     }
@@ -208,8 +187,10 @@ public class LSystemBuilder {
         leaf.setTranslateX(state.posX);
         leaf.setTranslateY(state.posY);
         leaf.setTranslateZ(state.posZ);
+        Rotate rx = new Rotate(state.pitch, Rotate.X_AXIS);
         Rotate ry = new Rotate(state.yaw, Rotate.Y_AXIS);
-        leaf.getTransforms().add(ry);
+        Rotate rz = new Rotate(state.roll, Rotate.Z_AXIS);
+        leaf.getTransforms().addAll(rz, rx, ry);
 
         return leaf;
     }

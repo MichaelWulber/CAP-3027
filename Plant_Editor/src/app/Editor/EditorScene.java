@@ -3,9 +3,6 @@ package app.Editor;
 import LSystem.LSystemBuilder;
 import LSystem.LSystemDescription;
 import LSystem.LSystemFileParser;
-import Mesh.LeafDescription;
-import Mesh.LeafMesh;
-import Plant.Leaf;
 import Plant.PlantComponent;
 import Plant.Plant_Iterators.Iter;
 import app.ForestGeneration.GenerateForestScene;
@@ -14,7 +11,9 @@ import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape3D;
 import javafx.scene.transform.Rotate;
@@ -99,7 +98,7 @@ public class EditorScene extends Scene {
                 primaryStage.setScene(new EditorScene(EditorScene.EDITOR_SCENE_WIDTH, EditorScene.EDITOR_SCENE_HEIGHT, LSystemFileParser.parseLSYS(fileChooser.showOpenDialog(primaryStage)), primaryStage));
                 System.out.println("...");
             } catch (Exception exception){
-                System.out.println(exception);
+                ErrorScene.display(exception.toString());
             }
         });
 
@@ -117,9 +116,15 @@ public class EditorScene extends Scene {
                             plant.radius + "\n" +
                             plant.shrinkRate + "\n" +
                             plant.resolution + "\n" +
-                            ColorSelector.r + "\n" +
-                            ColorSelector.g + "\n" +
-                            ColorSelector.b + "\n" +
+                            plant.color.getRed() + "\n" +
+                            plant.color.getGreen() + "\n" +
+                            plant.color.getBlue() + "\n" +
+                            plant.ld.color.getRed() + "\n" +
+                            plant.ld.color.getGreen() + "\n" +
+                            plant.ld.color.getBlue() + "\n" +
+                            plant.ld.r1 + "\n" +
+                            plant.ld.r2 + "\n" +
+                            plant.ld.tilt + "\n" +
                             plant.rules.size() + "\n" +
                             plant.seed;
                     for (Character key : plant.rules.keySet()){
@@ -134,7 +139,7 @@ public class EditorScene extends Scene {
                     fileWriter.close();
                 }
             } catch (Exception exception){
-                System.out.println(exception);
+                ErrorScene.display(exception.toString());
             }
         });
 
@@ -144,7 +149,7 @@ public class EditorScene extends Scene {
             try {
                 primaryStage.setScene(new GenerateForestScene(GenerateForestScene.DEFAULT_WIDTH, GenerateForestScene.DEFAULT_HEIGHT, primaryStage));
             } catch (Exception exception){
-                System.out.println(exception);
+                ErrorScene.display(exception.toString());
             }
         });
 
@@ -292,7 +297,7 @@ public class EditorScene extends Scene {
             plant.scale = newVal.intValue();
         });
 
-        Label xAngleDeltaLabel = new Label("X Angle Delta: " + plant.dPitch);
+        Label xAngleDeltaLabel = new Label("X Angle Delta: " + String.format("%.2f", plant.dPitch));
         Slider xAngleDeltaSlider = new Slider(0.0, 180.0, plant.dPitch);
         xAngleDeltaSlider.setOrientation(Orientation.HORIZONTAL);
         xAngleDeltaSlider.setPrefWidth(150);
@@ -303,7 +308,7 @@ public class EditorScene extends Scene {
             plant.dPitch = newVal.doubleValue();
         });
 
-        Label yAngleDeltaLabel = new Label("Y Angle Delta: " + plant.dYaw);
+        Label yAngleDeltaLabel = new Label("Y Angle Delta: " + String.format("%.2f", plant.dYaw));
         Slider yAngleDeltaSlider = new Slider(0.0, 180.0, plant.dYaw);
         yAngleDeltaSlider.setOrientation(Orientation.HORIZONTAL);
         yAngleDeltaSlider.setPrefWidth(150);
@@ -314,7 +319,7 @@ public class EditorScene extends Scene {
             plant.dYaw = newVal.doubleValue();
         });
 
-        Label zAngleDeltaLabel = new Label("Z Angle Delta: " + plant.dRoll);
+        Label zAngleDeltaLabel = new Label("Z Angle Delta: " + String.format("%.2f", plant.dRoll));
         Slider zAngleDeltaSlider = new Slider(0.0, 180.0, plant.dRoll);
         zAngleDeltaSlider.setOrientation(Orientation.HORIZONTAL);
         zAngleDeltaSlider.setPrefWidth(150);
@@ -349,7 +354,7 @@ public class EditorScene extends Scene {
         Button LeafSelection = new Button("Leaf Attributes");
         LeafSelection.setPrefWidth(150);
         LeafSelection.setOnAction(e -> {
-            plant.ld =  LeafSelector.display();
+            plant.ld =  LeafSelector.display(plant.ld);
         });
 
         Button colorSelection = new Button("Color");

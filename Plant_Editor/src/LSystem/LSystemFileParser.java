@@ -1,5 +1,6 @@
 package LSystem;
 
+import Mesh.LeafDescription;
 import javafx.scene.paint.Color;
 
 import java.io.File;
@@ -18,91 +19,136 @@ public class LSystemFileParser {
         float b;
         int numRules;
 
+        double radius1;
+        double radius2;
+        double tilt;
+
         // branching degree
         if (scanner.hasNextInt()) {
             lsd.branchingDegree = scanner.nextInt();
         } else {
-            throw new Exception("corrupted file 0");
+            throw new Exception("corrupted file: invalid branching degree");
         }
 
         // scale
         if (scanner.hasNextDouble()) {
             lsd.scale = scanner.nextDouble();
         } else {
-            throw new Exception("corrupted file 1");
+            throw new Exception("corrupted file: invalid scale");
         }
 
         // dPitch
         if (scanner.hasNextDouble()) {
             lsd.dPitch = scanner.nextDouble();
         } else {
-            throw new Exception("corrupted file 2");
+            throw new Exception("corrupted file: invalid pitch");
         }
 
         // dYaw
         if (scanner.hasNextDouble()) {
             lsd.dYaw = scanner.nextDouble();
         } else {
-            throw new Exception("corrupted file 3");
+            throw new Exception("corrupted file: invalid yaw");
         }
 
         // dRoll
         if (scanner.hasNextDouble()) {
             lsd.dRoll = scanner.nextDouble();
         } else {
-            throw new Exception("corrupted file 4");
+            throw new Exception("corrupted file: invalid roll");
         }
 
         // radius
         if (scanner.hasNextDouble()) {
             lsd.radius = scanner.nextDouble();
         } else {
-            throw new Exception("corrupted file 6");
+            throw new Exception("corrupted file: invalid initial radius");
         }
 
         // shrinkRate
         if (scanner.hasNextDouble()) {
             lsd.shrinkRate = scanner.nextDouble();
         } else {
-            throw new Exception("corrupted file 7");
+            throw new Exception("corrupted file: invalid shrink-rate");
         }
 
         // resolution
         if (scanner.hasNextInt()) {
             lsd.resolution = scanner.nextInt();
         } else {
-            throw new Exception("corrupted file 8");
+            throw new Exception("corrupted file: invalid resolution)");
         }
 
         // color
         if (scanner.hasNextFloat()) {
             r = scanner.nextFloat();
         } else {
-            throw new Exception("corrupted file 9");
+            throw new Exception("corrupted file: invalid color component (r)");
         }
 
         if (scanner.hasNextFloat()) {
             g = scanner.nextFloat();
         } else {
-            throw new Exception("corrupted file 10");
+            throw new Exception("corrupted file: invalid color component (g)");
         }
 
         if (scanner.hasNextFloat()) {
             b = scanner.nextFloat();
         } else {
-            throw new Exception("corrupted file 11");
-        }
-
-        if (scanner.hasNextInt()){
-            numRules = scanner.nextInt();
-        } else {
-            throw new Exception("corrupted file 12");
+            throw new Exception("corrupted file: invalid color component (b)");
         }
 
         lsd.color = new Color(r, g, b, 1);
 
+        // leaf description
+        if (scanner.hasNextFloat()) {
+            r = scanner.nextFloat();
+        } else {
+            throw new Exception("corrupted file: invalid leaf color component (r)");
+        }
+
+        if (scanner.hasNextFloat()) {
+            g = scanner.nextFloat();
+        } else {
+            throw new Exception("corrupted file: invalid leaf color component (g)");
+        }
+
+        if (scanner.hasNextFloat()) {
+            b = scanner.nextFloat();
+        } else {
+            throw new Exception("corrupted file: invalid leaf color component (b)");
+        }
+
+        if (scanner.hasNextDouble()) {
+            radius1 = scanner.nextDouble();
+        } else {
+            throw new Exception("corrupted file: invalid leaf radius1");
+        }
+
+        if (scanner.hasNextDouble()) {
+            radius2 = scanner.nextDouble();
+        } else {
+            throw new Exception("corrupted file: invalid leaf radius2");
+        }
+
+        if (scanner.hasNextDouble()) {
+            tilt = scanner.nextDouble();
+        } else {
+            throw new Exception("corrupted file: invalid leaf tilt");
+        }
+
+        lsd.ld = new LeafDescription(new Color(r, g, b, 1), radius1, radius2, tilt);
+
+        if (scanner.hasNextInt()){
+            numRules = scanner.nextInt();
+        } else {
+            throw new Exception("corrupted file: invalid number of rules");
+        }
+
         if (scanner.hasNext()){
             lsd.seed = new StringBuilder(scanner.next());
+        } else {
+            throw new Exception("corrupted file: invalid seed");
         }
 
 

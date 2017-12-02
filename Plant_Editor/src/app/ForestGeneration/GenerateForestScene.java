@@ -3,6 +3,7 @@ package app.ForestGeneration;
 import LSystem.LSystemDescription;
 import LSystem.LSystemFileParser;
 import app.Editor.EditorScene;
+import app.Editor.ErrorScene;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
@@ -16,6 +17,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.util.Comparator;
 import java.util.List;
 
 public class GenerateForestScene extends Scene{
@@ -63,7 +65,7 @@ public class GenerateForestScene extends Scene{
             try {
                 primaryStage.setScene(new EditorScene(EditorScene.EDITOR_SCENE_WIDTH, EditorScene.EDITOR_SCENE_HEIGHT, LSystemFileParser.parseLSYS(fileChooser.showOpenDialog(primaryStage)), primaryStage));
             } catch (Exception exception){
-                System.out.println(exception);
+                ErrorScene.display(exception.toString());
             }
         });
 
@@ -73,7 +75,7 @@ public class GenerateForestScene extends Scene{
             try {
                 primaryStage.setScene(new GenerateForestScene(GenerateForestScene.DEFAULT_WIDTH, GenerateForestScene.DEFAULT_HEIGHT, primaryStage));
             } catch (Exception exception){
-                System.out.println(exception);
+                ErrorScene.display(exception.toString());
             }
         });
 
@@ -162,7 +164,7 @@ public class GenerateForestScene extends Scene{
             try {
                 alter.weight = Float.valueOf(weightField.getText());
             } catch (Exception exception){
-                System.out.println(weightField.getText() + " is not a valid float.");
+                ErrorScene.display(weightField.getText() + " is not a valid float.");
             }
             tableView.refresh();
         });
@@ -179,7 +181,7 @@ public class GenerateForestScene extends Scene{
             try {
                 max = Integer.valueOf(maxField.getText());
             } catch (Exception exception){
-                System.out.println(maxField.getText() + " is not a valid integer.");
+                ErrorScene.display(maxField.getText() + " is not a valid integer.");
             }
         });
 
@@ -195,12 +197,22 @@ public class GenerateForestScene extends Scene{
         generateButton.setOnAction(e -> {
             try {
                 LSystemDescription[] plants = new LSystemDescription[entries.size()];
+                entries.sort(new Comparator<TableEntry>() {
+                    @Override
+                    public int compare(TableEntry o1, TableEntry o2) {
+                        return (o1.weight < o2.weight) ? 1:0;
+                    }
+                });
+                int totalWieght = 0;
+                float[] weights = new float[entries.size()];
                 for (int i = 0; i < entries.size(); ++i) {
                     plants[i] = LSystemFileParser.parseLSYS(entries.get(i).file);
+                    weights[i] = entries.get(i).weight;
+                    totalWieght += entries.get(i).weight;
                 }
-                ForestDisplay forest = new ForestDisplay(ForestDisplay.DEFAULT_WIDTH, ForestDisplay.DEFAULT_HEIGHT, plants, max);
+                ForestDisplay forest = new ForestDisplay(ForestDisplay.DEFAULT_WIDTH, ForestDisplay.DEFAULT_HEIGHT, plants, weights, max, totalWieght);
             } catch (Exception exception){
-                System.out.println("Error Generating Forest");
+                ErrorScene.display("Error Generating Forest");
             }
         });
 

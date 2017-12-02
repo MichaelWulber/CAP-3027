@@ -35,7 +35,7 @@ public class LSystemDescription {
         this.rules = new HashMap<>();
         this.probs = new HashMap<>();
         this.color = new Color(0,0,0, 1);
-        this.ld = new LeafDescription(Color.GREEN, 1, 1, 0);
+        this.ld = new LeafDescription(new Color(0,0,0,1), 1, 1, 0);
     }
 
     public void addRule(char key, StringBuilder rule){

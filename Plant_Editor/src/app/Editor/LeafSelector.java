@@ -17,8 +17,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import javax.security.auth.callback.LanguageCallback;
-
 public class LeafSelector {
 
     public static float r = 0;
@@ -29,12 +27,21 @@ public class LeafSelector {
     public static double r2 = 1;
     public static double tilt = 0;
 
-    public static LeafDescription display(){
+    public static LeafDescription display(LeafDescription ld){
         Stage colorSelector = new Stage();
         BorderPane borderPane = new BorderPane();
         Scene scene = new Scene(borderPane, 450, 450);
         colorSelector.initModality(Modality.APPLICATION_MODAL);
         colorSelector.setTitle("color selection");
+
+        // set values
+        r = (float) ld.color.getRed();
+        g = (float) ld.color.getGreen();
+        b = (float) ld.color.getBlue();
+
+        r1 = ld.r1;
+        r2 = ld.r2;
+        tilt = ld.tilt;
 
         // preview color
         StackPane pane = new StackPane();

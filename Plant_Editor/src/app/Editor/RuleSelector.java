@@ -1,21 +1,20 @@
 package app.Editor;
 
 import LSystem.LSystemDescription;
-import app.ForestGeneration.TableEntry;
-import com.sun.deploy.security.ruleset.Rule;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import java.lang.reflect.Executable;
 
 public class RuleSelector {
     private static ObservableList<String> rules;
@@ -61,7 +60,7 @@ public class RuleSelector {
                 processRule(rule, lsd);
                 entries.add(new RuleEntry(ruleField.getText(), 1.0));
             } catch (Exception exception){
-                // error dialogue
+                ErrorScene.display(exception.toString());
             }
             tableView.refresh();
         });
@@ -103,8 +102,7 @@ public class RuleSelector {
                 }
 
             } catch (Exception exception){
-                System.out.println(exception);
-                System.out.println(probField.getText() + " is not a valid double");
+                ErrorScene.display(probField.getText() + " is not a valid double");
             }
         });
 
